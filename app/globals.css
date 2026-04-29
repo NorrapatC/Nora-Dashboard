@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+:root {
+  --claude-orange: #c96442;
+  --claude-orange-light: #f0e6e0;
+  --claude-dark: #1a1a19;
+  --claude-warm-bg: #f9f7f4;
+}
+
+body {
+  background-color: var(--claude-warm-bg);
+}
