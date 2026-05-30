@@ -17,6 +17,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { PIPELINE_STAGES, type StageStatus } from "@/lib/pipeline";
 import { usePipeline } from "@/contexts/PipelineContext";
+import HQWorkflowGraph from "@/components/HQWorkflowGraph";
 
 // Phaser office — same dynamic(ssr:false) pattern used on the /hq page.
 const HQGame = dynamic(() => import("@/components/HQGame"), {
@@ -175,6 +176,7 @@ export default function HQCommandCenter() {
   const clock = useClock();
   const { getEffectiveStatus, progress } = usePipeline();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [view, setView] = useState<"office" | "graph">("office");
 
   return (
     <div className="flex h-full flex-col" style={{ background: C.bg, backgroundImage: GRID, fontFamily: MONO }}>
@@ -246,17 +248,44 @@ export default function HQCommandCenter() {
           </div>
         </aside>
 
-        {/* Center — COMMAND CENTER (Phaser office) */}
+        {/* Center — COMMAND CENTER: toggle between the office and workflow graph */}
         <main className="relative flex min-w-0 flex-1 flex-col">
-          <PanelTitle>COMMAND CENTER — LIVE OFFICE · คลิกตัวละครเพื่อดูรายละเอียด</PanelTitle>
+          <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: `1px solid ${C.border}` }}>
+            <span style={{ color: C.cyan, fontFamily: MONO, fontSize: 10, letterSpacing: 2 }}>
+              ◆ COMMAND CENTER
+            </span>
+            <div className="flex items-center gap-1 rounded-md overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
+              {(["office", "graph"] as const).map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setView(v)}
+                  className="px-2.5 py-1 transition-colors"
+                  style={{
+                    fontSize: 9, letterSpacing: 1, fontFamily: MONO,
+                    background: view === v ? C.cyan : "transparent",
+                    color: view === v ? "#06121a" : C.muted,
+                    fontWeight: view === v ? 700 : 400,
+                  }}
+                >
+                  {v === "office" ? "⊞ OFFICE" : "⌗ GRAPH"}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="relative flex-1" style={{ minHeight: 0, background: "#1a1a19" }}>
-            <HQGame onAgentClick={setSelectedId} />
-            {/* CRT scanline overlay — purely cosmetic; pointer-events-none lets
-                clicks pass straight through to the Phaser canvas underneath. */}
-            <div
-              className="pointer-events-none absolute inset-0"
-              style={{ backgroundImage: "repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0 1px, transparent 1px 3px)" }}
-            />
+            {view === "office" ? (
+              <>
+                <HQGame onAgentClick={setSelectedId} />
+                {/* CRT scanline overlay — cosmetic; pointer-events-none lets clicks
+                    pass straight through to the Phaser canvas underneath. */}
+                <div
+                  className="pointer-events-none absolute inset-0"
+                  style={{ backgroundImage: "repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0 1px, transparent 1px 3px)" }}
+                />
+              </>
+            ) : (
+              <HQWorkflowGraph selectedId={selectedId} onSelect={setSelectedId} />
+            )}
           </div>
         </main>
 
@@ -373,6 +402,11 @@ function AgentDetail({ stageId, onClose }: { stageId: string; onClose: () => voi
           <div style={{ color: C.muted, fontSize: 10, lineHeight: 1.4 }}>{stage.description}</div>
         </Field>
 
+        {/* Role-specific mini board (mock, flavours each agent) */}
+        <Field label="ROLE BOARD">
+          <RoleBoard stageId={stageId} />
+        </Field>
+
         {/* Timestamps */}
         <Field label="TIMING">
           <Row k="Started" v={fmtTime(state.startedAt)} />
@@ -423,6 +457,45 @@ function Row({ k, v }: { k: string; v: string }) {
       <span style={{ color: C.text, fontSize: 10 }}>{v}</span>
     </div>
   );
+}
+
+function Pill({ label, ok = true }: { label: string; ok?: boolean }) {
+  const col = ok ? C.green : C.red;
+  return (
+    <span style={{
+      fontSize: 8, letterSpacing: 0.5, padding: "2px 5px", borderRadius: 4,
+      color: col, background: `${col}1a`, border: `1px solid ${col}40`,
+    }}>{label}</span>
+  );
+}
+
+// Role-specific mini dashboards (mock — gives each agent its own character,
+// matching the reference's per-role widgets). Isolated so real data can swap in.
+function RoleBoard({ stageId }: { stageId: string }) {
+  switch (stageId) {
+    case "nora": return <><Row k="Queued" v="3" /><Row k="Routed today" v="12" /></>;
+    case "aria": return <><Row k="ADRs logged" v="4" /><Row k="Open decisions" v="1" /></>;
+    case "nova": return <><Row k="Design tokens" v="synced ✓" /><Row k="Contrast" v="AA ✓" /></>;
+    case "sage": return <><Row k="Tables" v="8" /><Row k="Indexes" v="14" /><Row k="N+1 queries" v="0 ✓" /></>;
+    case "mia": return <><Row k="Components" v="23" /><Row k="Bundle" v="118 kB" /></>;
+    case "luna": return <><Row k="Endpoints" v="12" /><Row k="Validated" v="12/12 ✓" /></>;
+    case "vera": return (
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-1.5">🛡 <span style={{ color: C.text, fontSize: 10 }}>0 threats</span></div>
+        <div className="flex flex-wrap gap-1"><Pill label="OWASP PASS" /><Pill label="AUTH OK" /></div>
+      </div>
+    );
+    case "iris": return <><Row k="Quality" v="✓" /><Row k="Standards" v="✓" /><Row k="Critical" v="0 ✓" /></>;
+    case "zoe": return (
+      <div className="space-y-1.5">
+        <div className="flex flex-wrap gap-1"><Pill label="UNIT ✓" /><Pill label="INTEG ✓" /><Pill label="E2E ✓" /></div>
+        <Row k="Passing" v="47 / 47" />
+      </div>
+    );
+    case "rex": return <><Row k="Build" v="✓" /><Row k="CI/CD" v="green" /><Row k="Pipeline" v="5/5" /></>;
+    case "lyra": return <><Row k="Doc pages" v="6" /><Row k="API docs" v="✓" /></>;
+    default: return <span style={{ color: C.dim, fontSize: 10 }}>—</span>;
+  }
 }
 
 function Stat({ label, value, color, bar }: { label: string; value: React.ReactNode; color: string; bar?: number }) {
