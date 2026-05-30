@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 import { PIPELINE_STAGES, type StageStatus } from "@/lib/pipeline";
 import { usePipeline } from "@/contexts/PipelineContext";
 import HQWorkflowGraph from "@/components/HQWorkflowGraph";
+import HQRoster from "@/components/HQRoster";
 
 // Phaser office — same dynamic(ssr:false) pattern used on the /hq page.
 const HQGame = dynamic(() => import("@/components/HQGame"), {
@@ -176,7 +177,7 @@ export default function HQCommandCenter() {
   const clock = useClock();
   const { getEffectiveStatus, progress } = usePipeline();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [view, setView] = useState<"office" | "graph">("office");
+  const [view, setView] = useState<"office" | "graph" | "roster">("office");
 
   return (
     <div className="flex h-full flex-col" style={{ background: C.bg, backgroundImage: GRID, fontFamily: MONO }}>
@@ -255,7 +256,11 @@ export default function HQCommandCenter() {
               ◆ COMMAND CENTER
             </span>
             <div className="flex items-center gap-1 rounded-md overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
-              {(["office", "graph"] as const).map((v) => (
+              {([
+                ["office", "⊞ OFFICE"],
+                ["graph", "⌗ GRAPH"],
+                ["roster", "★ ROSTER"],
+              ] as const).map(([v, label]) => (
                 <button
                   key={v}
                   onClick={() => setView(v)}
@@ -267,7 +272,7 @@ export default function HQCommandCenter() {
                     fontWeight: view === v ? 700 : 400,
                   }}
                 >
-                  {v === "office" ? "⊞ OFFICE" : "⌗ GRAPH"}
+                  {label}
                 </button>
               ))}
             </div>
@@ -283,8 +288,10 @@ export default function HQCommandCenter() {
                   style={{ backgroundImage: "repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0 1px, transparent 1px 3px)" }}
                 />
               </>
-            ) : (
+            ) : view === "graph" ? (
               <HQWorkflowGraph selectedId={selectedId} onSelect={setSelectedId} />
+            ) : (
+              <HQRoster selectedId={selectedId} onSelect={setSelectedId} />
             )}
           </div>
         </main>
