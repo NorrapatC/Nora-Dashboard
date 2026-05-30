@@ -19,6 +19,7 @@ import { PIPELINE_STAGES, type StageStatus } from "@/lib/pipeline";
 import { usePipeline } from "@/contexts/PipelineContext";
 import HQWorkflowGraph from "@/components/HQWorkflowGraph";
 import HQRoster from "@/components/HQRoster";
+import HQHud from "@/components/HQHud";
 
 // Phaser office — same dynamic(ssr:false) pattern used on the /hq page.
 const HQGame = dynamic(() => import("@/components/HQGame"), {
@@ -177,7 +178,7 @@ export default function HQCommandCenter() {
   const clock = useClock();
   const { getEffectiveStatus, progress } = usePipeline();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [view, setView] = useState<"office" | "graph" | "roster">("office");
+  const [view, setView] = useState<"hud" | "office" | "graph" | "roster">("hud");
 
   return (
     <div className="flex h-full flex-col" style={{ background: C.bg, backgroundImage: GRID, fontFamily: MONO }}>
@@ -257,6 +258,7 @@ export default function HQCommandCenter() {
             </span>
             <div className="flex items-center gap-1 rounded-md overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
               {([
+                ["hud", "◎ HUD"],
                 ["office", "⊞ OFFICE"],
                 ["graph", "⌗ GRAPH"],
                 ["roster", "★ ROSTER"],
@@ -277,8 +279,10 @@ export default function HQCommandCenter() {
               ))}
             </div>
           </div>
-          <div className="relative flex-1" style={{ minHeight: 0, background: "#1a1a19" }}>
-            {view === "office" ? (
+          <div className="relative flex-1" style={{ minHeight: 0, background: "#0a0e17" }}>
+            {view === "hud" ? (
+              <HQHud selectedId={selectedId} onSelect={setSelectedId} />
+            ) : view === "office" ? (
               <>
                 <HQGame onAgentClick={setSelectedId} />
                 {/* CRT scanline overlay — cosmetic; pointer-events-none lets clicks

@@ -209,7 +209,7 @@ function buildSceneConfig(PH: typeof Phaser, clickHolder: ClickHolder): Phaser.T
     // 32×32 per tile, covering the full canvas below the wall strip.
     scene.add.tileSprite(W / 2, 58 + (H - 58) / 2, W, H - 58, 'floor_tile')
       .setTileScale(2, 2)
-      .setTint(0x9c6b35)
+      .setTint(0x223347)
       .setDepth(-1);
 
     // ── Wall strip ─────────────────────────────────────────────────────────────
@@ -230,8 +230,8 @@ function buildSceneConfig(PH: typeof Phaser, clickHolder: ClickHolder): Phaser.T
 
     // ── Wall furniture ─────────────────────────────────────────────────────────
     // Bookshelves left + right, whiteboard center — origin bottom so they sit on wall base
-    scene.add.image(Math.round(W * 0.18), 60, 'bookshelf').setScale(2).setOrigin(0.5, 0).setDepth(1);
-    scene.add.image(Math.round(W * 0.82), 60, 'bookshelf').setScale(2).setOrigin(0.5, 0).setDepth(1);
+    scene.add.image(Math.round(W * 0.18), 60, 'bookshelf').setScale(2).setOrigin(0.5, 0).setDepth(1).setTint(0x4a5a72);
+    scene.add.image(Math.round(W * 0.82), 60, 'bookshelf').setScale(2).setOrigin(0.5, 0).setDepth(1).setTint(0x4a5a72);
     scene.add.image(Math.round(W * 0.5),  60, 'whiteboard').setScale(2).setOrigin(0.5, 0).setDepth(1);
 
     // Plants at corners (tall, against wall)
@@ -278,7 +278,7 @@ function buildSceneConfig(PH: typeof Phaser, clickHolder: ClickHolder): Phaser.T
     // depth 0 = desk, depth 1 = character, depth 2 = PC monitor (on top of both)
 
     // Desk sprite (behind character, depth 0)
-    scene.add.image(x, y, 'desk').setScale(2).setOrigin(0.5, 0.5).setDepth(0);
+    scene.add.image(x, y, 'desk').setScale(2).setOrigin(0.5, 0.5).setDepth(0).setTint(0x55657f);
 
     // PC monitor on desk back surface (depth 2 — always visible above character)
     scene.add.image(x, y - 18, 'pc').setScale(2).setOrigin(0.5, 0.5).setDepth(2);
@@ -456,7 +456,7 @@ export default function HQGame({ onAgentClick }: { onAgentClick?: (stageId: stri
           mode: PH.Scale.RESIZE,
           autoCenter: PH.Scale.CENTER_BOTH,
         },
-        backgroundColor: "#2a1d12",
+        backgroundColor: "#0a0e17",
         pixelArt: true,       // WHY: disables canvas smoothing → crisp sprites at 2× scale
         antialias: false,
         roundPixels: true,    // WHY: snaps positions to integer pixels → no sub-pixel blur
