@@ -79,12 +79,49 @@ const NAV = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { t } = useLanguage();
+  // Mobile drawer state. On md+ the sidebar is always visible (md:translate-x-0)
+  // and this state is irrelevant; on mobile it slides in over a backdrop.
+  const [open, setOpen] = useState(false);
+
+  // Close the drawer whenever the route changes (mobile nav tap → navigate → close).
+  useEffect(() => { setOpen(false); }, [pathname]);
+
+  // Lock body scroll while the mobile drawer is open.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
 
   return (
-    <aside
-      className="fixed inset-y-0 left-0 z-30 flex w-56 flex-col"
-      style={{ backgroundColor: "#1a1a19", borderRight: "1px solid #2d2d2a" }}
-    >
+    <>
+      {/* ── Mobile hamburger (floating — doesn't affect page layout) ── */}
+      <button
+        onClick={() => setOpen(true)}
+        aria-label="Open menu"
+        className="fixed left-3 top-3 z-50 flex size-10 items-center justify-center rounded-xl shadow-lg md:hidden"
+        style={{ background: "#1a1a19", border: "1px solid #2d2d2a" }}
+      >
+        <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+        </svg>
+      </button>
+
+      {/* ── Backdrop (mobile only, when open) ── */}
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          aria-hidden
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex w-56 flex-col transition-transform duration-200 md:translate-x-0 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+        style={{ backgroundColor: "#1a1a19", borderRight: "1px solid #2d2d2a" }}
+      >
       {/* ── Logo ── */}
       <div className="flex items-center gap-3 px-5 py-5" style={{ borderBottom: "1px solid #2d2d2a" }}>
         <div
@@ -112,6 +149,7 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setOpen(false)}
               className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150"
               style={
                 active
@@ -172,5 +210,6 @@ export default function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   );
 }
