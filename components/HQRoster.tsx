@@ -4,6 +4,7 @@
 // Power values are flavour data (mock) tuned per role; status is REAL (usePipeline).
 // Click a card → the same AGENT DETAIL panel. Pure CSS, zero runtime cost.
 
+import Image from "next/image";
 import { PIPELINE_STAGES, type StageStatus } from "@/lib/pipeline";
 import { usePipeline } from "@/contexts/PipelineContext";
 
@@ -19,11 +20,6 @@ const STATUS_META: Record<StageStatus, { label: string; color: string }> = {
   completed:   { label: "DONE",    color: C.cyan },
   blocked:     { label: "BLOCKED", color: C.red },
   idle:        { label: "IDLE",    color: C.dim },
-};
-
-// stageId → spritesheet index (matches scripts/gen_sprites.py order).
-const SPRITE_IDX: Record<string, number> = {
-  nora: 0, mia: 1, luna: 2, aria: 3, vera: 4, rex: 5, sage: 6, iris: 7, zoe: 8, nova: 9, lyra: 10,
 };
 
 // Power stats (mock, tuned per role) + level. SPD=speed, QLT=quality, PWR=power, FOC=focus.
@@ -45,24 +41,6 @@ function statColor(v: number): string {
   if (v >= 90) return C.green;
   if (v >= 80) return C.cyan;
   return C.amber;
-}
-
-// Pixel-sprite avatar: crops the idle-front frame (col1,row0 = 16,0) out of the
-// 112×96 spritesheet and scales it up with nearest-neighbour (pixelated).
-function SpriteAvatar({ idx, scale = 2 }: { idx: number; scale?: number }) {
-  return (
-    <div
-      className="shrink-0"
-      style={{
-        width: 16 * scale,
-        height: 32 * scale,
-        backgroundImage: `url(/sprites/char_${idx}.png)`,
-        backgroundSize: `${112 * scale}px ${96 * scale}px`,
-        backgroundPosition: `-${16 * scale}px 0px`,
-        imageRendering: "pixelated",
-      }}
-    />
-  );
 }
 
 function StatBar({ label, value }: { label: string; value: number }) {
@@ -102,8 +80,9 @@ export default function HQRoster({ selectedId, onSelect }: { selectedId: string 
             >
               {/* header: avatar + identity + status */}
               <div className="flex items-center gap-2.5">
-                <div className="rounded-md p-1" style={{ background: "#0a0f1a", border: `1px solid ${s.agent.color}55` }}>
-                  <SpriteAvatar idx={SPRITE_IDX[s.id]} />
+                <div className="relative size-12 shrink-0 overflow-hidden rounded-md"
+                  style={{ border: `1px solid ${s.agent.color}88`, boxShadow: `0 0 8px ${s.agent.color}33` }}>
+                  <Image src={`/team/${s.id}.png`} alt={s.agent.name} fill className="object-cover object-top" sizes="48px" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">

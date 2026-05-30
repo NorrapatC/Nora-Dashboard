@@ -60,14 +60,13 @@ const FRAME = {
   idleDown:  1,
 };
 
-// WHY 3: at 11 agents, capping at 3 keeps ≥8 desks occupied at all times while
-// adding a little more life than the old 6-agent / cap-2 setup.
-const MAX_WALKING = 3;
+// WHY 2 (was 3): fewer agents moving at once = a calmer, more orderly office.
+// At 3+ they kept clustering/overlapping in the middle, which read as chaotic.
+const MAX_WALKING = 2;
 
-// WHY 70px radius (was 100): with a denser 4-column grid the columns sit closer
-// together, so a smaller wander radius keeps agents in their own zone without
-// brushing a neighbour's desk.
-const WALK_RADIUS = 70;
+// WHY 45px radius (was 70): keep wanderers very close to their own desk so the
+// office stays tidy and agents don't drift into a pile near the centre.
+const WALK_RADIUS = 45;
 
 type AgentState = "sitting" | "walking" | "returning";
 
@@ -195,7 +194,7 @@ function buildSceneConfig(PH: typeof Phaser, clickHolder: ClickHolder): Phaser.T
           updateLabels(agent);
           // WHY 8000–20000ms: previous 3–7s was too short — agents barely sat
           // before leaving again. 8–20s gives a natural work-then-stretch feel.
-          scene.time.delayedCall(PH.Math.Between(8000, 20000), () => scheduleWalk(scene, agent));
+          scene.time.delayedCall(PH.Math.Between(16000, 36000), () => scheduleWalk(scene, agent));
         });
       });
     });
@@ -478,9 +477,11 @@ export default function HQGame({ onAgentClick }: { onAgentClick?: (stageId: stri
     <div
       ref={containerRef}
       style={{
+        // Fill the parent. WHY no maxHeight: a 520px cap left a large black void
+        // below the office whenever the container was taller (e.g. the /hq center
+        // panel). Phaser's Scale.RESIZE now sizes the canvas to the full area.
         position: "absolute",
         inset: 0,
-        maxHeight: "520px",
         imageRendering: "pixelated",
       }}
     />
