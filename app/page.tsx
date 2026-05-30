@@ -10,6 +10,7 @@ import RequirementsPanel from "@/components/RequirementsPanel";
 import FeedbackPanel from "@/components/FeedbackPanel";
 import PipelineBoard from "@/components/pipeline/PipelineBoard";
 import TeamWorkflowPanel from "@/components/TeamWorkflowPanel";
+import HQOfficeWidget from "@/components/HQOfficeWidget";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 const CLAUDE_ORANGE = "#c96442";
@@ -141,6 +142,14 @@ export default function Page() {
           <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {PIPELINE_STAGES.map((stage) => <AgentCard key={stage.id} stage={stage} />)}
           </div>
+        </section>
+
+        {/* ─── HQ Pixel Office (live) ─── */}
+        <section>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">HQ Office</h2>
+          <ErrorBoundary label="HQ Office">
+            <HQOfficeWidget />
+          </ErrorBoundary>
         </section>
 
         {/* ─── Today's Goals quick link ─── */}

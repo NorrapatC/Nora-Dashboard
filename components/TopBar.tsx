@@ -6,6 +6,7 @@ const CLAUDE_ORANGE = "#c96442";
 
 const PAGE_TITLES: Record<string, string> = {
   "/":          "Dashboard",
+  "/hq":        "NRP HQ",
   "/goals":     "Goals",
   "/freelance": "Freelance",
 };
