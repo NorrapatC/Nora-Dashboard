@@ -50,6 +50,22 @@ const C = {
 
 const MONO = "ui-monospace, SFMono-Regular, Menlo, monospace";
 
+// Faint HUD grid for the background (very low alpha → never fights the text).
+const GRID =
+  "repeating-linear-gradient(0deg, rgba(34,211,238,0.035) 0 1px, transparent 1px 40px)," +
+  "repeating-linear-gradient(90deg, rgba(34,211,238,0.035) 0 1px, transparent 1px 40px)";
+
+// Group the 11 agents by department for the TEAM STATUS list.
+const DEPARTMENTS: { name: string; ids: string[] }[] = [
+  { name: "COMMAND",     ids: ["nora", "aria"] },
+  { name: "DEVELOPMENT", ids: ["mia", "luna", "sage"] },
+  { name: "OPERATIONS",  ids: ["vera", "iris", "zoe", "rex"] },
+  { name: "CREATIVE",    ids: ["nova", "lyra"] },
+];
+
+// Mock hourly "runs" for the bottom-bar sparkline (decorative).
+const RUNS_SPARK = [3, 5, 4, 8, 6, 9, 7, 11, 8, 12, 10, 14];
+
 // Map the pipeline's real StageStatus → HUD label + color.
 const STATUS_META: Record<StageStatus, { label: string; color: string; glow: boolean }> = {
   in_progress: { label: "WORKING", color: C.green, glow: true },
@@ -77,10 +93,10 @@ function PanelTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Dot({ color, glow = true }: { color: string; glow?: boolean }) {
+function Dot({ color, glow = true, pulse = false }: { color: string; glow?: boolean; pulse?: boolean }) {
   return (
     <span
-      className="inline-block size-2 rounded-full shrink-0"
+      className={`inline-block size-2 rounded-full shrink-0 ${pulse ? "animate-pulse" : ""}`}
       style={{ background: color, boxShadow: glow ? `0 0 6px ${color}` : "none" }}
     />
   );
@@ -90,6 +106,43 @@ function Bar({ pct, color }: { pct: number; color: string }) {
   return (
     <div className="h-1.5 w-full overflow-hidden rounded-sm" style={{ background: "#0a0f1a" }}>
       <div className="h-full rounded-sm" style={{ width: `${pct}%`, background: color, boxShadow: `0 0 6px ${color}` }} />
+    </div>
+  );
+}
+
+// ─── Count-up animation (numbers tick up on mount) ────────────────────────────
+function useCountUp(target: number, ms = 800): number {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / ms);
+      const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
+      setN(target * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else setN(target);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms]);
+  return n;
+}
+
+function CountUp({ end, decimals = 0, suffix = "" }: { end: number; decimals?: number; suffix?: string }) {
+  const n = useCountUp(end);
+  return <>{n.toFixed(decimals)}{suffix}</>;
+}
+
+// ─── Sparkline (tiny inline bar chart) ────────────────────────────────────────
+function Sparkline({ data, color }: { data: number[]; color: string }) {
+  const max = Math.max(...data, 1);
+  return (
+    <div className="flex items-end gap-px" style={{ height: 14 }}>
+      {data.map((v, i) => (
+        <span key={i} className="inline-block w-1 rounded-sm"
+          style={{ height: `${Math.max(12, (v / max) * 100)}%`, background: color, opacity: 0.45 + 0.55 * (v / max) }} />
+      ))}
     </div>
   );
 }
@@ -123,14 +176,11 @@ export default function HQCommandCenter() {
   const { getEffectiveStatus, progress } = usePipeline();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // Real per-agent status, resolved through pipeline dependencies.
-  const statuses = PIPELINE_STAGES.map((s) => getEffectiveStatus(s.id));
-
   return (
-    <div className="flex h-full flex-col" style={{ background: C.bg, fontFamily: MONO }}>
+    <div className="flex h-full flex-col" style={{ background: C.bg, backgroundImage: GRID, fontFamily: MONO }}>
       {/* ── Header ─────────────────────────────────────────────── */}
       <div
-        className="flex items-center justify-between px-4 py-2.5 shrink-0"
+        className="flex items-center justify-between py-2.5 shrink-0 pl-16 pr-4 md:px-4"
         style={{ background: C.panel, borderBottom: `1px solid ${C.border}` }}
       >
         <div className="flex items-center gap-3">
@@ -152,46 +202,61 @@ export default function HQCommandCenter() {
         <aside className="hidden md:flex w-[248px] shrink-0 flex-col" style={{ background: C.panel, borderRight: `1px solid ${C.border}` }}>
           <PanelTitle>TEAM STATUS</PanelTitle>
           <div className="flex-1 overflow-y-auto">
-            {PIPELINE_STAGES.map((s, i) => {
-              const meta = STATUS_META[statuses[i]];
-              const active = selectedId === s.id;
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => setSelectedId(active ? null : s.id)}
-                  className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left transition-colors"
-                  style={{
-                    borderBottom: "1px solid #0c1320",
-                    borderLeft: `2px solid ${active ? meta.color : "transparent"}`,
-                    background: active ? C.panelHi : "transparent",
-                  }}
-                >
-                  <Dot color={meta.color} glow={meta.glow} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span style={{ color: C.text, fontSize: 11, fontWeight: 700 }}>{s.agent.name}</span>
-                      <span className="truncate" style={{ color: C.dim, fontSize: 9 }}>{s.agent.role}</span>
-                    </div>
-                  </div>
-                  <span style={{ color: meta.color, fontSize: 8, letterSpacing: 1 }}>[{meta.label}]</span>
-                </button>
-              );
-            })}
+            {DEPARTMENTS.map((dept) => (
+              <div key={dept.name}>
+                <div className="px-3 pt-2.5 pb-1" style={{ color: C.dim, fontSize: 8, letterSpacing: 2 }}>
+                  ▸ {dept.name}
+                </div>
+                {dept.ids.map((id) => {
+                  const s = PIPELINE_STAGES.find((st) => st.id === id);
+                  if (!s) return null;
+                  const status = getEffectiveStatus(id);
+                  const meta = STATUS_META[status];
+                  const active = selectedId === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => setSelectedId(active ? null : id)}
+                      className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left transition-colors"
+                      style={{
+                        borderLeft: `2px solid ${active ? meta.color : "transparent"}`,
+                        background: active ? C.panelHi : "transparent",
+                      }}
+                    >
+                      <Dot color={meta.color} glow={meta.glow} pulse={status === "in_progress"} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span style={{ color: C.text, fontSize: 11, fontWeight: 700 }}>{s.agent.name}</span>
+                          <span className="truncate" style={{ color: C.dim, fontSize: 9 }}>{s.agent.role}</span>
+                        </div>
+                      </div>
+                      <span style={{ color: meta.color, fontSize: 8, letterSpacing: 1 }}>[{meta.label}]</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </div>
           {/* Stats block — real counts from the pipeline */}
           <div className="grid grid-cols-2 gap-px shrink-0" style={{ background: C.border, borderTop: `1px solid ${C.border}` }}>
-            <Stat label="ACTIVE" value={`${progress.inProgress}/${progress.total}`} color={C.green} />
-            <Stat label="DONE" value={`${progress.completed}`} color={C.cyan} />
-            <Stat label="PROGRESS" value={`${progress.pct}%`} color={C.amber} bar={progress.pct} />
-            <Stat label="BLOCKED" value={`${progress.blocked}`} color={progress.blocked ? C.red : C.green} />
+            <Stat label="ACTIVE" value={<><CountUp end={progress.inProgress} />/{progress.total}</>} color={C.green} />
+            <Stat label="DONE" value={<CountUp end={progress.completed} />} color={C.cyan} />
+            <Stat label="PROGRESS" value={<CountUp end={progress.pct} suffix="%" />} color={C.amber} bar={progress.pct} />
+            <Stat label="BLOCKED" value={<CountUp end={progress.blocked} />} color={progress.blocked ? C.red : C.green} />
           </div>
         </aside>
 
         {/* Center — COMMAND CENTER (Phaser office) */}
         <main className="relative flex min-w-0 flex-1 flex-col">
-          <PanelTitle>COMMAND CENTER — LIVE OFFICE</PanelTitle>
+          <PanelTitle>COMMAND CENTER — LIVE OFFICE · คลิกตัวละครเพื่อดูรายละเอียด</PanelTitle>
           <div className="relative flex-1" style={{ minHeight: 0, background: "#1a1a19" }}>
-            <HQGame />
+            <HQGame onAgentClick={setSelectedId} />
+            {/* CRT scanline overlay — purely cosmetic; pointer-events-none lets
+                clicks pass straight through to the Phaser canvas underneath. */}
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{ backgroundImage: "repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0 1px, transparent 1px 3px)" }}
+            />
           </div>
         </main>
 
@@ -206,15 +271,19 @@ export default function HQCommandCenter() {
       {/* ── Bottom metrics bar ─────────────────────────────────── */}
       <div className="flex items-center gap-1 overflow-x-auto px-3 py-2 shrink-0"
         style={{ background: C.panel, borderTop: `1px solid ${C.border}` }}>
-        <Metric label="PIPELINE" value="●●●●●○" color={C.cyan} />
+        <Metric label="PIPELINE" value={`${progress.completed}/${progress.total}`} color={C.cyan} />
         <Sep />
         <Metric label="AUTO MODE" value="ON" color={C.green} />
         <Sep />
-        <Metric label="QUEUE" value="3" color={C.text} />
+        <Metric label="QUEUE" value={<CountUp end={3} />} color={C.text} />
         <Sep />
-        <Metric label="RUNS TODAY" value="128" color={C.text} />
+        <div className="flex items-center gap-1.5 px-2 shrink-0">
+          <span style={{ color: C.muted, fontSize: 9, letterSpacing: 1 }}>RUNS TODAY</span>
+          <span style={{ color: C.text, fontSize: 11, fontWeight: 700 }}><CountUp end={128} /></span>
+          <Sparkline data={RUNS_SPARK} color={C.cyan} />
+        </div>
         <Sep />
-        <Metric label="SUCCESS" value="98.7%" color={C.green} />
+        <Metric label="SUCCESS" value={<CountUp end={98.7} decimals={1} suffix="%" />} color={C.green} />
         <Sep />
         <div className="flex items-center gap-2 px-2 shrink-0">
           <span style={{ color: C.muted, fontSize: 9, letterSpacing: 1 }}>SYSTEM HEALTH</span>
@@ -356,7 +425,7 @@ function Row({ k, v }: { k: string; v: string }) {
   );
 }
 
-function Stat({ label, value, color, bar }: { label: string; value: string; color: string; bar?: number }) {
+function Stat({ label, value, color, bar }: { label: string; value: React.ReactNode; color: string; bar?: number }) {
   return (
     <div className="px-3 py-2" style={{ background: "#0f1623" }}>
       <div style={{ color: C.dim, fontSize: 8, letterSpacing: 1 }}>{label}</div>
@@ -366,7 +435,7 @@ function Stat({ label, value, color, bar }: { label: string; value: string; colo
   );
 }
 
-function Metric({ label, value, color }: { label: string; value: string; color: string }) {
+function Metric({ label, value, color }: { label: string; value: React.ReactNode; color: string }) {
   return (
     <div className="flex items-center gap-1.5 px-2 shrink-0">
       <span style={{ color: C.muted, fontSize: 9, letterSpacing: 1 }}>{label}</span>

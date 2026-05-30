@@ -10,6 +10,7 @@ import type Phaser from "phaser";
 // ─── Agent config ─────────────────────────────────────────────────────────────
 interface AgentConfig {
   id: number;
+  stageId: string; // pipeline id (nora, aria, …) — used for click → AGENT DETAIL
   name: string;
   role: string;
   spriteKey: string;
@@ -21,18 +22,22 @@ interface AgentConfig {
 // with a proportional 4×3 grid based on canvas size. spriteKey order matches
 // scripts/gen_sprites.py (char_0 = Nora … char_10 = Lyra).
 const AGENTS: AgentConfig[] = [
-  { id: 0,  name: "Nora", role: "Secretary", spriteKey: "char_0",  deskX: 150, deskY: 150 },
-  { id: 1,  name: "Mia",  role: "Frontend",  spriteKey: "char_1",  deskX: 350, deskY: 150 },
-  { id: 2,  name: "Luna", role: "Backend",   spriteKey: "char_2",  deskX: 550, deskY: 150 },
-  { id: 3,  name: "Aria", role: "Tech Lead", spriteKey: "char_3",  deskX: 150, deskY: 320 },
-  { id: 4,  name: "Vera", role: "Security",  spriteKey: "char_4",  deskX: 350, deskY: 320 },
-  { id: 5,  name: "Rex",  role: "DevOps",    spriteKey: "char_5",  deskX: 550, deskY: 320 },
-  { id: 6,  name: "Sage", role: "Database",  spriteKey: "char_6",  deskX: 150, deskY: 480 },
-  { id: 7,  name: "Iris", role: "Reviewer",  spriteKey: "char_7",  deskX: 350, deskY: 480 },
-  { id: 8,  name: "Zoe",  role: "QA",        spriteKey: "char_8",  deskX: 550, deskY: 480 },
-  { id: 9,  name: "Nova", role: "UI/UX",     spriteKey: "char_9",  deskX: 150, deskY: 480 },
-  { id: 10, name: "Lyra", role: "Writer",    spriteKey: "char_10", deskX: 350, deskY: 480 },
+  { id: 0,  stageId: "nora", name: "Nora", role: "Secretary", spriteKey: "char_0",  deskX: 150, deskY: 150 },
+  { id: 1,  stageId: "mia",  name: "Mia",  role: "Frontend",  spriteKey: "char_1",  deskX: 350, deskY: 150 },
+  { id: 2,  stageId: "luna", name: "Luna", role: "Backend",   spriteKey: "char_2",  deskX: 550, deskY: 150 },
+  { id: 3,  stageId: "aria", name: "Aria", role: "Tech Lead", spriteKey: "char_3",  deskX: 150, deskY: 320 },
+  { id: 4,  stageId: "vera", name: "Vera", role: "Security",  spriteKey: "char_4",  deskX: 350, deskY: 320 },
+  { id: 5,  stageId: "rex",  name: "Rex",  role: "DevOps",    spriteKey: "char_5",  deskX: 550, deskY: 320 },
+  { id: 6,  stageId: "sage", name: "Sage", role: "Database",  spriteKey: "char_6",  deskX: 150, deskY: 480 },
+  { id: 7,  stageId: "iris", name: "Iris", role: "Reviewer",  spriteKey: "char_7",  deskX: 350, deskY: 480 },
+  { id: 8,  stageId: "zoe",  name: "Zoe",  role: "QA",        spriteKey: "char_8",  deskX: 550, deskY: 480 },
+  { id: 9,  stageId: "nova", name: "Nova", role: "UI/UX",     spriteKey: "char_9",  deskX: 150, deskY: 480 },
+  { id: 10, stageId: "lyra", name: "Lyra", role: "Writer",    spriteKey: "char_10", deskX: 350, deskY: 480 },
 ];
+
+// Bridge for click → React. A ref-like holder so the (once-built) Phaser scene
+// always calls the latest callback without being rebuilt.
+type ClickHolder = { current?: (stageId: string) => void };
 
 // ─── Sprite animation frame indices ──────────────────────────────────────────
 // Spritesheet: 112×96px, 16×32 frames, 7 cols × 3 rows = 21 total frames
@@ -82,7 +87,7 @@ interface AgentObject {
 // The return type is `object` because Phaser accepts a plain object with
 // {key, preload, create} even though the TS type `CreateSceneFromObjectConfig`
 // doesn't include `key` (key lives in SettingsConfig which gets merged at runtime).
-function buildSceneConfig(PH: typeof Phaser): Phaser.Types.Scenes.CreateSceneFromObjectConfig & { key: string } {
+function buildSceneConfig(PH: typeof Phaser, clickHolder: ClickHolder): Phaser.Types.Scenes.CreateSceneFromObjectConfig & { key: string } {
   const agents: AgentObject[] = [];
 
   // WHY module-level counter inside closure (not on AgentObject):
@@ -286,6 +291,12 @@ function buildSceneConfig(PH: typeof Phaser): Phaser.Types.Scenes.CreateSceneFro
     const sprite = scene.add.sprite(x, y + 20, cfg.spriteKey);
     sprite.setScale(2).setOrigin(0.5, 1).setDepth(1);
 
+    // Click the character → open its AGENT DETAIL panel in React.
+    // useHandCursor gives a pointer; clickHolder.current is the latest React
+    // callback (kept fresh via a ref so the scene never needs rebuilding).
+    sprite.setInteractive({ useHandCursor: true });
+    sprite.on("pointerdown", () => clickHolder.current?.(cfg.stageId));
+
     // Register animations (guard with .exists to avoid duplicate-key errors)
     const sitKey = `${cfg.spriteKey}_sit`;
     if (!scene.anims.exists(sitKey)) {
@@ -416,9 +427,13 @@ function buildSceneConfig(PH: typeof Phaser): Phaser.Types.Scenes.CreateSceneFro
 }
 
 // ─── React component ──────────────────────────────────────────────────────────
-export default function HQGame() {
+export default function HQGame({ onAgentClick }: { onAgentClick?: (stageId: string) => void } = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
+  // Keep the latest click callback in a ref so the (once-built) Phaser scene
+  // always calls the current handler without re-initializing the game.
+  const clickHolder = useRef<((stageId: string) => void) | undefined>(undefined);
+  clickHolder.current = onAgentClick;
 
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
@@ -433,7 +448,7 @@ export default function HQGame() {
       if (destroyed || !containerRef.current) return;
 
       const PH = mod.default;
-      const sceneConfig = buildSceneConfig(PH);
+      const sceneConfig = buildSceneConfig(PH, clickHolder);
 
       gameRef.current = new PH.Game({
         type: PH.AUTO,
