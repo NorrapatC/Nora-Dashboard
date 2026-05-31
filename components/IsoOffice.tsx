@@ -26,23 +26,6 @@ const STATUS_DOT: Record<StageStatus, string> = {
   in_progress: "#16a34a", completed: "#0ea5e9", blocked: "#ef4444", idle: "#9aa088",
 };
 
-// Per-agent face: hair colour + front-view style (+ glasses), from the portraits.
-type Face = { hair: string; style: "bob" | "bun" | "ponytail" | "curly" | "short" | "spiky" | "medium"; glasses?: boolean };
-const FACE: Record<string, Face> = {
-  nora: { hair: "#1a1a1a", style: "bob" },
-  aria: { hair: "#a0522d", style: "bun" },
-  mia:  { hair: "#7a4a28", style: "bob" },
-  luna: { hair: "#15151f", style: "ponytail" },
-  sage: { hair: "#6d4c2f", style: "curly" },
-  vera: { hair: "#1c1c1c", style: "medium", glasses: true },
-  iris: { hair: "#cfd8dc", style: "bun" },
-  zoe:  { hair: "#e6c200", style: "curly" },
-  rex:  { hair: "#e65100", style: "short" },
-  nova: { hair: "#9c27b0", style: "spiky" },
-  lyra: { hair: "#a0522d", style: "ponytail" },
-  safe: { hair: "#1f1b18", style: "short" },
-};
-const DEFAULT_FACE: Face = { hair: "#3a3128", style: "short" };
 
 // ── Isometric projection ──
 const TW = 116, TH = 58, ZH = 38; // tile width / height, z unit height
@@ -59,8 +42,14 @@ function Desk({ gx, gy }: { gx: number; gy: number }) {
   // bottom corners (z=0) for the two viewer-facing side faces
   const trB = iso(gx + s, gy - s, 0), brB = iso(gx + s, gy + s, 0), blB = iso(gx - s, gy + s, 0);
   const m = iso(gx, gy - 0.15, h); // monitor sits at the back of the desktop
+  // cubicle back divider panel (low sage wall behind the desk)
+  const pw = 0.5; // panel half-height in z added above desk
+  const pbTL = iso(gx - s, gy - s, h + pw), pbTR = iso(gx + s, gy - s, h + pw);
+  const pbBL = iso(gx - s, gy - s, 0), pbBR = iso(gx + s, gy - s, 0);
   return (
     <g>
+      {/* cubicle divider (behind everything in this cell) */}
+      <polygon points={pts([pbTL, pbTR, pbBR, pbBL])} fill={PAL.wallR} stroke={PAL.floorEdge} strokeWidth={0.5} />
       {/* +x (right) face */}
       <polygon points={pts([trT, brT, brB, trB])} fill={PAL.deskR} />
       {/* +y (front) face */}
@@ -77,72 +66,27 @@ function Desk({ gx, gy }: { gx: number; gy: number }) {
   );
 }
 
-// ── Face (front-view), relative to head centre. Order: back-hair, head, hair cap,
-//    eyes, mouth, glasses — so features layer correctly. ──
-function FaceArt({ face }: { face: Face }) {
-  const c = face.hair;
-  const topCap = "M -11 1 Q -12 -15 0 -15 Q 12 -15 11 1 Q 5 -5 0 -5 Q -5 -5 -11 1 Z";
-  return (
-    <g>
-      {/* back hair (drawn before head) */}
-      {face.style === "bun" && <circle cx={0} cy={-13} r={5.5} fill={c} />}
-      {face.style === "ponytail" && <ellipse cx={11} cy={-1} rx={4.5} ry={9} fill={c} />}
-      {(face.style === "medium" || face.style === "bob") && (
-        <path d="M -11 -2 Q -12 9 -8 12 L -6 -2 Z M 11 -2 Q 12 9 8 12 L 6 -2 Z" fill={c} />
-      )}
-
-      {/* head */}
-      <circle cx={0} cy={0} r={11} fill={PAL.skin} />
-
-      {/* hair cap / style on top */}
-      {face.style === "curly" ? (
-        <g fill={c}>
-          {[-8, -4, 0, 4, 8].map((x, i) => <circle key={i} cx={x} cy={-9 + (i % 2) * 2} r={4} />)}
-          <path d={topCap} />
-        </g>
-      ) : face.style === "spiky" ? (
-        <g fill={c}>
-          <path d={topCap} />
-          <path d="M -8 -9 L -6 -16 L -3 -10 M -1 -10 L 1 -17 L 4 -10 M 5 -10 L 8 -15 L 9 -9" />
-        </g>
-      ) : (
-        <path d={topCap} fill={c} />
-      )}
-
-      {/* eyes */}
-      <ellipse cx={-4} cy={-1} rx={1.7} ry={2.3} fill="#2a2320" />
-      <ellipse cx={4} cy={-1} rx={1.7} ry={2.3} fill="#2a2320" />
-      {/* mouth (smile) */}
-      <path d="M -3.2 5 Q 0 8 3.2 5" stroke="#b5705f" strokeWidth={1.3} fill="none" strokeLinecap="round" />
-
-      {/* glasses */}
-      {face.glasses && (
-        <g stroke="#2c2c2c" strokeWidth={1} fill="none">
-          <rect x={-7.5} y={-3.5} width={6.5} height={5.5} rx={1.2} />
-          <rect x={1} y={-3.5} width={6.5} height={5.5} rx={1.2} />
-          <line x1={-1} y1={-1} x2={1} y2={-1} />
-        </g>
-      )}
-    </g>
-  );
-}
-
-// ── A seated character + name pill ──
+// ── A seated character: real portrait avatar (clipped circle) + body + name pill ──
 function Person({ gx, gy, id, color, name, dot, selected, onClick }: {
   gx: number; gy: number; id: string; color: string; name: string; dot: string; selected: boolean; onClick?: () => void;
 }) {
   const p = iso(gx, gy + 0.34, 0); // a touch in front of the desk
-  const face = FACE[id] ?? DEFAULT_FACE;
+  const R = 16;
   return (
     <g transform={`translate(${p.sx},${p.sy})`} onClick={onClick} style={{ cursor: onClick ? "pointer" : "default" }}>
       {/* shadow */}
       <ellipse cx={0} cy={2} rx={16} ry={8} fill={PAL.shadow} />
-      {/* body */}
-      <path d={`M -11 -2 Q -12 -26 0 -27 Q 12 -26 11 -2 Z`} fill={color} stroke={selected ? "#3a3f33" : "none"} strokeWidth={selected ? 2 : 0} />
-      {/* head + face */}
-      <g transform="translate(0,-37)"><FaceArt face={face} /></g>
+      {/* body (shoulders) */}
+      <path d={`M -12 -2 Q -13 -24 0 -25 Q 13 -24 12 -2 Z`} fill={color} stroke={selected ? "#3a3f33" : "none"} strokeWidth={selected ? 2 : 0} />
+      {/* portrait avatar (real face, top-cropped, clipped to a circle) */}
+      <g transform="translate(0,-40)">
+        <circle r={R} fill={PAL.skin} />
+        <image href={`/team/${id}.png`} x={-R} y={-R} width={R * 2} height={R * 2}
+          preserveAspectRatio="xMidYMin slice" clipPath="url(#isoAvatarClip)" />
+        <circle r={R} fill="none" stroke={selected ? color : "#fbfbf3"} strokeWidth={selected ? 3 : 2} />
+      </g>
       {/* name pill */}
-      <g transform="translate(0,-62)">
+      <g transform="translate(0,-66)">
         <rect x={-Math.max(22, name.length * 4 + 12)} y={-9} width={Math.max(44, name.length * 8 + 24)} height={17} rx={8.5}
           fill={PAL.pill} stroke={selected ? color : PAL.pillBorder} strokeWidth={selected ? 1.5 : 1} />
         <circle cx={-Math.max(22, name.length * 4 + 12) + 10} cy={0} r={3} fill={dot} />
@@ -196,6 +140,10 @@ export default function IsoOffice({
   return (
     <div className="absolute inset-0 flex items-center justify-center overflow-auto" style={{ background: PAL.bg }}>
       <svg viewBox={`${vb.minX} ${vb.minY} ${vb.w} ${vb.h}`} className="h-full w-full" preserveAspectRatio="xMidYMid meet" style={{ maxHeight: "100%" }}>
+        <defs>
+          {/* circular crop for portrait avatars */}
+          <clipPath id="isoAvatarClip" clipPathUnits="objectBoundingBox"><circle cx="0.5" cy="0.5" r="0.5" /></clipPath>
+        </defs>
         {/* floor slab under the whole grid */}
         <FloorSlab agents={agents} cols={cols} />
         {items.map((it) => it.el)}
