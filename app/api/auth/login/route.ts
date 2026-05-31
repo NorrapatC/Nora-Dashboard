@@ -64,9 +64,11 @@ export async function POST(req: NextRequest) {
   const res = NextResponse.json({ ok: true });
   res.cookies.set("nora_session", secret, {
     httpOnly: true,
+    // secure only in production so the cookie still works on http://localhost.
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: 60 * 60 * 24 * 30, // 30 days — log in ~once a month, not every visit
   });
   return res;
 }

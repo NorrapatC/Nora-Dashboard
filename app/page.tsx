@@ -5,11 +5,11 @@ import { usePipeline } from "@/contexts/PipelineContext";
 import { PIPELINE_STAGES } from "@/lib/pipeline";
 import TopBar from "@/components/TopBar";
 import NoraBriefing from "@/components/NoraBriefing";
-import AgentCard from "@/components/AgentCard";
 import RequirementsPanel from "@/components/RequirementsPanel";
 import FeedbackPanel from "@/components/FeedbackPanel";
 import PipelineBoard from "@/components/pipeline/PipelineBoard";
 import TeamWorkflowPanel from "@/components/TeamWorkflowPanel";
+import HQOfficeWidget from "@/components/HQOfficeWidget";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 const CLAUDE_ORANGE = "#c96442";
@@ -111,7 +111,7 @@ export default function Page() {
 
       <main className="px-6 py-6 space-y-8">
 
-        {/* ─── Nora Briefing (รวม Stats + Interview Countdown) ─── */}
+        {/* ─── 1. Nora Briefing — summary of today ─── */}
         <ErrorBoundary label="Nora Briefing">
           <NoraBriefing
             activeCount={activeCount}
@@ -124,60 +124,7 @@ export default function Page() {
           />
         </ErrorBoundary>
 
-        {/* ─── Pipeline ─── */}
-        <section>
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">Development Pipeline</h2>
-          <ErrorBoundary label="Pipeline">
-            <PipelineBoard />
-          </ErrorBoundary>
-        </section>
-
-        {/* ─── Team ─── */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">{t.teamMembers}</h2>
-            <span className="text-xs text-slate-400">{PIPELINE_STAGES.length} {t.agents}</span>
-          </div>
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-            {PIPELINE_STAGES.map((stage) => <AgentCard key={stage.id} stage={stage} />)}
-          </div>
-        </section>
-
-        {/* ─── Today's Goals quick link ─── */}
-        <div className="flex items-center justify-between rounded-2xl bg-white px-5 py-3.5 shadow-sm"
-          style={{ border: "1px solid #ede9e3" }}>
-          <div className="flex items-center gap-3">
-            <span className="text-lg">🎯</span>
-            <div>
-              <p className="text-sm font-semibold text-slate-800">วันนี้</p>
-              <p className="text-xs text-slate-400">
-                {todayGoalsTotal === 0
-                  ? "ยังไม่มี goal — ไปเพิ่มได้เลย"
-                  : `${todayGoalsDone}/${todayGoalsTotal} goals เสร็จแล้ว`}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            {todayGoalsTotal > 0 && (
-              <div className="flex items-center gap-2">
-                <div className="w-24 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                  <div className="h-full rounded-full transition-all"
-                    style={{ width: `${Math.round((todayGoalsDone / todayGoalsTotal) * 100)}%`, backgroundColor: "#c96442" }} />
-                </div>
-                <span className="text-xs font-semibold text-slate-500">
-                  {Math.round((todayGoalsDone / todayGoalsTotal) * 100)}%
-                </span>
-              </div>
-            )}
-            <a href="/goals"
-              className="text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors"
-              style={{ background: "#fdf3ef", color: "#c96442", border: "1px solid #f5d6c8" }}>
-              จัดการ Goals →
-            </a>
-          </div>
-        </div>
-
-        {/* ─── Nora Dispatch ─── */}
+        {/* ─── 2. Ask Nora — primary action, surfaced near the top ─── */}
         <section>
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">Ask Nora</h2>
           <div className="rounded-2xl bg-white shadow-sm overflow-hidden" style={{ border: "1px solid #ede9e3" }}>
@@ -220,7 +167,78 @@ export default function Page() {
           </div>
         </section>
 
-        {/* ─── Requirements + Feedback ─── */}
+        {/* ─── 3. Today's Goals quick link — what to do today ─── */}
+        <div className="flex items-center justify-between rounded-2xl bg-white px-5 py-3.5 shadow-sm"
+          style={{ border: "1px solid #ede9e3" }}>
+          <div className="flex items-center gap-3">
+            <span className="text-lg">🎯</span>
+            <div>
+              <p className="text-sm font-semibold text-slate-800">วันนี้</p>
+              <p className="text-xs text-slate-400">
+                {todayGoalsTotal === 0
+                  ? "ยังไม่มี goal — ไปเพิ่มได้เลย"
+                  : `${todayGoalsDone}/${todayGoalsTotal} goals เสร็จแล้ว`}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {todayGoalsTotal > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="w-24 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                  <div className="h-full rounded-full transition-all"
+                    style={{ width: `${Math.round((todayGoalsDone / todayGoalsTotal) * 100)}%`, backgroundColor: "#c96442" }} />
+                </div>
+                <span className="text-xs font-semibold text-slate-500">
+                  {Math.round((todayGoalsDone / todayGoalsTotal) * 100)}%
+                </span>
+              </div>
+            )}
+            <a href="/goals"
+              className="text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors"
+              style={{ background: "#fdf3ef", color: "#c96442", border: "1px solid #f5d6c8" }}>
+              จัดการ Goals →
+            </a>
+          </div>
+        </div>
+
+        {/* ─── 4. Pipeline — the process ─── */}
+        <section>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">Development Pipeline</h2>
+          <ErrorBoundary label="Pipeline">
+            <PipelineBoard />
+          </ErrorBoundary>
+        </section>
+
+        {/* ─── 5. HQ Office (live) + compact team strip → full roster at /hq ─── */}
+        {/* WHY no full AgentCard grid here anymore: the same 11 agents were shown
+            three ways on this page (pipeline + cards + office). The full roster +
+            per-agent status now lives in the /hq Command Center; here we keep the
+            ambient office + a compact team strip that links there. */}
+        <section>
+          <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">HQ Office · {t.teamMembers}</h2>
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-1.5">
+                {PIPELINE_STAGES.map((s) => (
+                  <span key={s.id} title={s.agent.name}
+                    className="inline-block size-4 rounded-full ring-2 ring-white"
+                    style={{ background: s.agent.color }} />
+                ))}
+              </div>
+              <span className="text-xs text-slate-400">{PIPELINE_STAGES.length} {t.agents}</span>
+              <a href="/hq"
+                className="text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors"
+                style={{ background: "#fdf3ef", color: "#c96442", border: "1px solid #f5d6c8" }}>
+                ดูทีม → /hq
+              </a>
+            </div>
+          </div>
+          <ErrorBoundary label="HQ Office">
+            <HQOfficeWidget />
+          </ErrorBoundary>
+        </section>
+
+        {/* ─── 6. Requirements + Feedback — heavier management, kept at the bottom ─── */}
         <div className="grid gap-6 lg:grid-cols-5">
           <div className="lg:col-span-3">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">

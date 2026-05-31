@@ -6,6 +6,7 @@ const CLAUDE_ORANGE = "#c96442";
 
 const PAGE_TITLES: Record<string, string> = {
   "/":          "Dashboard",
+  "/hq":        "NRP HQ",
   "/goals":     "Goals",
   "/freelance": "Freelance",
 };
@@ -28,7 +29,7 @@ export default function TopBar({ children }: TopBarProps) {
 
   return (
     <header
-      className="sticky top-0 z-20 flex items-center justify-between gap-4 px-6 py-3"
+      className="sticky top-0 z-20 flex items-center justify-between gap-4 py-3 pl-16 pr-4 md:px-6"
       style={{
         backgroundColor: "rgba(249,247,244,0.85)",
         backdropFilter: "blur(12px)",
