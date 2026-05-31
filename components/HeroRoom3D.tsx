@@ -9,6 +9,34 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 
 const BRAND = "#c96442";
+const SKIN = "#ebc8a8";
+const SHIRT = "#d9c7a8"; // beige shirt (matches the avatar reference)
+const HAIR = "#1f1b18";
+const PANTS = "#5a6b85";
+
+// Seated developer at the desk (low-poly, faces the desk = -z).
+function SeatedDev() {
+  return (
+    <group position={[0.2, 0.95, -0.5]}>
+      {/* torso */}
+      <mesh position={[0, 0.45, 0.02]} rotation={[0.06, 0, 0]} castShadow>
+        <boxGeometry args={[0.68, 0.8, 0.46]} /><meshStandardMaterial color={SHIRT} flatShading />
+      </mesh>
+      {/* head + hair */}
+      <mesh position={[0, 1.04, -0.02]} castShadow><boxGeometry args={[0.42, 0.44, 0.4]} /><meshStandardMaterial color={SKIN} flatShading /></mesh>
+      <mesh position={[0, 1.28, -0.03]} castShadow><boxGeometry args={[0.48, 0.2, 0.46]} /><meshStandardMaterial color={HAIR} flatShading /></mesh>
+      <mesh position={[0, 1.12, -0.22]}><boxGeometry args={[0.46, 0.34, 0.12]} /><meshStandardMaterial color={HAIR} flatShading /></mesh>
+      {/* arms reaching forward to the desk */}
+      <mesh position={[-0.34, 0.42, -0.34]} rotation={[1.0, 0, 0]} castShadow><boxGeometry args={[0.17, 0.62, 0.17]} /><meshStandardMaterial color={SHIRT} flatShading /></mesh>
+      <mesh position={[0.34, 0.42, -0.34]} rotation={[1.0, 0, 0]} castShadow><boxGeometry args={[0.17, 0.62, 0.17]} /><meshStandardMaterial color={SHIRT} flatShading /></mesh>
+      {/* thighs (sitting) + shins */}
+      <mesh position={[-0.17, 0.02, -0.32]} castShadow><boxGeometry args={[0.24, 0.2, 0.66]} /><meshStandardMaterial color={PANTS} flatShading /></mesh>
+      <mesh position={[0.17, 0.02, -0.32]} castShadow><boxGeometry args={[0.24, 0.2, 0.66]} /><meshStandardMaterial color={PANTS} flatShading /></mesh>
+      <mesh position={[-0.17, -0.42, -0.62]} castShadow><boxGeometry args={[0.2, 0.7, 0.2]} /><meshStandardMaterial color={PANTS} flatShading /></mesh>
+      <mesh position={[0.17, -0.42, -0.62]} castShadow><boxGeometry args={[0.2, 0.7, 0.2]} /><meshStandardMaterial color={PANTS} flatShading /></mesh>
+    </group>
+  );
+}
 
 function Books({ x }: { x: number }) {
   const cols = ["#c96442", "#6366f1", "#10b981", "#f59e0b", "#ef4444", "#0ea5e9"];
@@ -110,6 +138,9 @@ function Room() {
         <boxGeometry args={[3.4, 2.8, 0.04]} />
         <meshStandardMaterial color="#fdf3ef" flatShading />
       </mesh>
+
+      {/* seated developer */}
+      <SeatedDev />
     </group>
   );
 }

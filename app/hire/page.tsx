@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import Reveal from "@/components/Reveal";
 const TemplateGallery = dynamic(() => import("@/components/TemplateGallery"), { ssr: false });
 const HeroRoom3D = dynamic(() => import("@/components/HeroRoom3D"), {
   ssr: false,
@@ -395,12 +396,14 @@ export default function HirePage() {
       <section className="px-6 py-16" style={{ background: "#f8fafc" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {WHY.map((w) => (
-              <div key={w.title} className="rounded-2xl bg-white p-5 shadow-sm" style={{ border: "1px solid #ede9e3" }}>
-                <div className="text-2xl mb-3">{w.icon}</div>
-                <p className="text-sm font-bold text-slate-800 mb-2">{w.title}</p>
-                <p className="text-xs text-slate-500 leading-relaxed">{w.body}</p>
-              </div>
+            {WHY.map((w, i) => (
+              <Reveal key={w.title} delay={i * 80}>
+                <div className="rounded-2xl bg-white p-5 shadow-sm h-full" style={{ border: "1px solid #ede9e3" }}>
+                  <div className="text-2xl mb-3">{w.icon}</div>
+                  <p className="text-sm font-bold text-slate-800 mb-2">{w.title}</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">{w.body}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -409,18 +412,21 @@ export default function HirePage() {
       {/* ── Packages / Pricing ── */}
       <section id="services" className="px-6 py-20">
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div className="text-center mb-14">
-            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: ORANGE }}>Packages</p>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4" style={{ letterSpacing: -1 }}>
-              ราคาชัดเจน ไม่มีค่าใช้จ่ายซ่อน
-            </h2>
-            <p className="text-slate-500 max-w-lg mx-auto">ราคาเป็น estimate — ราคาจริงขึ้นอยู่กับ scope ของ project ปรึกษาฟรีก่อนเริ่ม</p>
-          </div>
+          <Reveal>
+            <div className="text-center mb-14">
+              <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: ORANGE }}>Packages</p>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4" style={{ letterSpacing: -1 }}>
+                ราคาชัดเจน ไม่มีค่าใช้จ่ายซ่อน
+              </h2>
+              <p className="text-slate-500 max-w-lg mx-auto">ราคาเป็น estimate — ราคาจริงขึ้นอยู่กับ scope ของ project ปรึกษาฟรีก่อนเริ่ม</p>
+            </div>
+          </Reveal>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {SERVICES.map((svc) => (
-              <div key={svc.id}
-                className="rounded-2xl bg-white p-6 shadow-sm flex flex-col"
+            {SERVICES.map((svc, i) => (
+              <Reveal key={svc.id} delay={i * 80} className="h-full">
+              <div
+                className="rounded-2xl bg-white p-6 shadow-sm flex flex-col h-full"
                 style={{ border: "1px solid #ede9e3" }}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="size-11 rounded-xl flex items-center justify-center text-xl"
@@ -465,6 +471,7 @@ export default function HirePage() {
                   </div>
                 </div>
               </div>
+              </Reveal>
             ))}
           </div>
 
