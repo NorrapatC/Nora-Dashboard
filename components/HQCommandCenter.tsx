@@ -21,6 +21,16 @@ import HQWorkflowGraph from "@/components/HQWorkflowGraph";
 import HQRoster from "@/components/HQRoster";
 import HQHud from "@/components/HQHud";
 
+// 3D scene (three.js) — lazy so it stays out of the bundle until the 3D view opens.
+const HQScene3D = dynamic(() => import("@/components/HQScene3D"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center" style={{ background: "#0a0e17" }}>
+      <p style={{ color: "#3d5170", fontSize: 11, fontFamily: "monospace" }}>LOADING 3D…</p>
+    </div>
+  ),
+});
+
 // Phaser office — same dynamic(ssr:false) pattern used on the /hq page.
 const HQGame = dynamic(() => import("@/components/HQGame"), {
   ssr: false,
@@ -178,7 +188,7 @@ export default function HQCommandCenter() {
   const clock = useClock();
   const { getEffectiveStatus, progress } = usePipeline();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [view, setView] = useState<"hud" | "office" | "graph" | "roster">("hud");
+  const [view, setView] = useState<"hud" | "office" | "graph" | "roster" | "scene3d">("hud");
 
   return (
     <div className="flex h-full flex-col" style={{ background: C.bg, backgroundImage: GRID, fontFamily: MONO }}>
@@ -259,6 +269,7 @@ export default function HQCommandCenter() {
             <div className="flex items-center gap-1 rounded-md overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
               {([
                 ["hud", "◎ HUD"],
+                ["scene3d", "◈ 3D"],
                 ["office", "⊞ OFFICE"],
                 ["graph", "⌗ GRAPH"],
                 ["roster", "★ ROSTER"],
@@ -282,6 +293,8 @@ export default function HQCommandCenter() {
           <div className="relative flex-1" style={{ minHeight: 0, background: "#0a0e17" }}>
             {view === "hud" ? (
               <HQHud selectedId={selectedId} onSelect={setSelectedId} />
+            ) : view === "scene3d" ? (
+              <HQScene3D selectedId={selectedId} onSelect={setSelectedId} />
             ) : view === "office" ? (
               <>
                 <HQGame onAgentClick={setSelectedId} />
