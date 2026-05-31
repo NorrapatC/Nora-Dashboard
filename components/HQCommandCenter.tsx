@@ -12,7 +12,6 @@
 // each block is isolated so a real source (n8n→Notion) can replace it later.
 // Aesthetic is original — inspired by HUD dashboards, not copied.
 
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { PIPELINE_STAGES, type StageStatus } from "@/lib/pipeline";
@@ -20,30 +19,14 @@ import { usePipeline } from "@/contexts/PipelineContext";
 import HQWorkflowGraph from "@/components/HQWorkflowGraph";
 import HQRoster from "@/components/HQRoster";
 import HQHud from "@/components/HQHud";
+import IsoOffice from "@/components/IsoOffice";
 
-// 3D scene (three.js) — lazy so it stays out of the bundle until the 3D view opens.
-const HQScene3D = dynamic(() => import("@/components/HQScene3D"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center" style={{ background: "#0a0e17" }}>
-      <p style={{ color: "#3d5170", fontSize: 11, fontFamily: "monospace" }}>LOADING 3D…</p>
-    </div>
-  ),
-});
+// Team agents for the 2D isometric office.
+const ISO_AGENTS = PIPELINE_STAGES.map((s) => ({ id: s.id, name: s.agent.name, color: s.agent.color }));
 
-// Phaser office — same dynamic(ssr:false) pattern used on the /hq page.
-const HQGame = dynamic(() => import("@/components/HQGame"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center" style={{ background: "#0a0e17" }}>
-      <div className="text-center space-y-3">
-        <div className="mx-auto size-7 animate-spin rounded-full border-2"
-          style={{ borderColor: "#1e2a3d", borderTopColor: "#22d3ee" }} />
-        <p style={{ color: "#3d5170", fontSize: "11px", fontFamily: "monospace" }}>BOOTING HQ...</p>
-      </div>
-    </div>
-  ),
-});
+// NOTE: the old Phaser office (HQGame) and 3D scene (HQScene3D) are no longer wired
+// into the view switcher — the OFFICE view is now the 2D isometric office (IsoOffice).
+// Those component files are kept on disk in case we revisit pixel/3D.
 
 // ─── Palette ────────────────────────────────────────────────────────────────
 const C = {
@@ -188,7 +171,7 @@ export default function HQCommandCenter() {
   const clock = useClock();
   const { getEffectiveStatus, progress } = usePipeline();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [view, setView] = useState<"hud" | "office" | "graph" | "roster" | "scene3d">("hud");
+  const [view, setView] = useState<"hud" | "office" | "graph" | "roster">("hud");
 
   return (
     <div className="flex h-full flex-col" style={{ background: C.bg, backgroundImage: GRID, fontFamily: MONO }}>
@@ -269,7 +252,6 @@ export default function HQCommandCenter() {
             <div className="flex items-center gap-1 rounded-md overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
               {([
                 ["hud", "◎ HUD"],
-                ["scene3d", "◈ 3D"],
                 ["office", "⊞ OFFICE"],
                 ["graph", "⌗ GRAPH"],
                 ["roster", "★ ROSTER"],
@@ -293,18 +275,8 @@ export default function HQCommandCenter() {
           <div className="relative flex-1" style={{ minHeight: 0, background: "#0a0e17" }}>
             {view === "hud" ? (
               <HQHud selectedId={selectedId} onSelect={setSelectedId} />
-            ) : view === "scene3d" ? (
-              <HQScene3D selectedId={selectedId} onSelect={setSelectedId} />
             ) : view === "office" ? (
-              <>
-                <HQGame onAgentClick={setSelectedId} />
-                {/* CRT scanline overlay — cosmetic; pointer-events-none lets clicks
-                    pass straight through to the Phaser canvas underneath. */}
-                <div
-                  className="pointer-events-none absolute inset-0"
-                  style={{ backgroundImage: "repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0 1px, transparent 1px 3px)" }}
-                />
-              </>
+              <IsoOffice agents={ISO_AGENTS} selectedId={selectedId} onSelect={setSelectedId} />
             ) : view === "graph" ? (
               <HQWorkflowGraph selectedId={selectedId} onSelect={setSelectedId} />
             ) : (

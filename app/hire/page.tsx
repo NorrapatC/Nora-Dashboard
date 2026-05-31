@@ -2,13 +2,8 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import Reveal from "@/components/Reveal";
+import IsoOffice from "@/components/IsoOffice";
 const TemplateGallery = dynamic(() => import("@/components/TemplateGallery"), { ssr: false });
-const HeroRoom3D = dynamic(() => import("@/components/HeroRoom3D"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center text-sm text-slate-300">โหลดห้อง 3D…</div>
-  ),
-});
 
 const ORANGE = "#c96442";
 
@@ -369,9 +364,10 @@ export default function HirePage() {
             </div>
           </div>
 
-          {/* 3D isometric workspace (auto-rotating, low-poly) */}
-          <div className="relative h-[340px] sm:h-[420px] w-full">
-            <HeroRoom3D />
+          {/* 2D isometric workspace (SVG, warm style) */}
+          <div className="relative h-[340px] sm:h-[420px] w-full overflow-hidden rounded-2xl"
+            style={{ border: "1px solid #ede9e3" }}>
+            <IsoOffice agents={[{ id: "safe", name: "Safe", color: ORANGE }]} cols={1} />
           </div>
         </div>
 
