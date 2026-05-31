@@ -78,11 +78,18 @@ function Person({ gx, gy, id, color, name, dot, selected, onClick }: {
       <ellipse cx={0} cy={2} rx={16} ry={8} fill={PAL.shadow} />
       {/* body (shoulders) */}
       <path d={`M -12 -2 Q -13 -24 0 -25 Q 13 -24 12 -2 Z`} fill={color} stroke={selected ? "#3a3f33" : "none"} strokeWidth={selected ? 2 : 0} />
-      {/* portrait avatar (real face, top-cropped, clipped to a circle) */}
+      {/* avatar: prefer a pixel-art version (drop files in public/team/pixel/{id}.png),
+          fall back to the smooth portrait until those exist. imageRendering:pixelated
+          keeps the pixel art crisp. */}
       <g transform="translate(0,-40)">
         <circle r={R} fill={PAL.skin} />
-        <image href={`/team/${id}.png`} x={-R} y={-R} width={R * 2} height={R * 2}
-          preserveAspectRatio="xMidYMin slice" clipPath="url(#isoAvatarClip)" />
+        <image href={`/team/pixel/${id}.png`} x={-R} y={-R} width={R * 2} height={R * 2}
+          preserveAspectRatio="xMidYMin slice" clipPath="url(#isoAvatarClip)"
+          style={{ imageRendering: "pixelated" }}
+          onError={(e) => {
+            const t = e.currentTarget;
+            if (!t.dataset.fallback) { t.dataset.fallback = "1"; t.setAttribute("href", `/team/${id}.png`); }
+          }} />
         <circle r={R} fill="none" stroke={selected ? color : "#fbfbf3"} strokeWidth={selected ? 3 : 2} />
       </g>
       {/* name pill */}
