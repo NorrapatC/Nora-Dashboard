@@ -12,12 +12,65 @@ import { OrbitControls } from "@react-three/drei";
 import { useState } from "react";
 import { PIPELINE_STAGES } from "@/lib/pipeline";
 
-// hair colour per agent (body colour comes from agent.color)
-const HAIR: Record<string, string> = {
-  nora: "#1a1a1a", aria: "#a0522d", mia: "#7a4a28", luna: "#1a1a2e", sage: "#6d4c2f",
-  vera: "#1c1c1c", iris: "#cfd8dc", zoe: "#e6c200", rex: "#e65100", nova: "#9c27b0", lyra: "#a0522d",
+// Per-agent look. At the team-overview zoom what reads is SILHOUETTE + COLOUR,
+// so the differentiators are: outfit colour, hair colour, and hair *style*
+// (the only geometry worth varying). Outfit colours are matched to each portrait.
+// To swap in a real model later: add a <GltfAgent url> branch where ProceduralAgent
+// is rendered (clean seam) — not wired now since there's no .glb to test against.
+type HairStyle = "bob" | "bun" | "ponytail" | "long" | "curly" | "spiky";
+const PROFILE: Record<string, { outfit: string; hair: string; style: HairStyle }> = {
+  nora: { outfit: "#1565c0", hair: "#1a1a1a", style: "bob" },
+  aria: { outfit: "#9e9e9e", hair: "#a0522d", style: "bun" },
+  mia:  { outfit: "#e57399", hair: "#7a4a28", style: "bob" },
+  luna: { outfit: "#37474f", hair: "#1a1a2e", style: "ponytail" },
+  sage: { outfit: "#4caf50", hair: "#6d4c2f", style: "curly" },
+  vera: { outfit: "#283593", hair: "#1c1c1c", style: "long" },
+  rex:  { outfit: "#3949ab", hair: "#e65100", style: "spiky" },
+  iris: { outfit: "#b0bec5", hair: "#cfd8dc", style: "bob" },
+  zoe:  { outfit: "#d81b60", hair: "#e6c200", style: "curly" },
+  nova: { outfit: "#f5c518", hair: "#9c27b0", style: "spiky" },
+  lyra: { outfit: "#7cb342", hair: "#a0522d", style: "ponytail" },
 };
 const SKIN = "#ebc8a8";
+
+// Hair geometry per style — 1–2 boxes each (silhouette differentiator).
+function Hair({ color, style }: { color: string; style: HairStyle }) {
+  const mat = <meshStandardMaterial color={color} flatShading />;
+  return (
+    <group>
+      {/* base cap on top of the head */}
+      <mesh position={[0, 1.76, -0.02]}>
+        <boxGeometry args={[0.56, style === "curly" ? 0.34 : 0.24, 0.56]} />
+        {mat}
+      </mesh>
+      {style === "bun" && (
+        <mesh position={[0, 1.98, -0.05]}><boxGeometry args={[0.26, 0.26, 0.26]} />{mat}</mesh>
+      )}
+      {style === "ponytail" && (
+        <mesh position={[0, 1.35, -0.34]}><boxGeometry args={[0.22, 0.7, 0.22]} />{mat}</mesh>
+      )}
+      {style === "long" && (
+        <>
+          <mesh position={[-0.3, 1.3, -0.05]}><boxGeometry args={[0.14, 0.7, 0.5]} />{mat}</mesh>
+          <mesh position={[0.3, 1.3, -0.05]}><boxGeometry args={[0.14, 0.7, 0.5]} />{mat}</mesh>
+        </>
+      )}
+      {style === "bob" && (
+        <>
+          <mesh position={[-0.29, 1.5, 0]}><boxGeometry args={[0.12, 0.4, 0.5]} />{mat}</mesh>
+          <mesh position={[0.29, 1.5, 0]}><boxGeometry args={[0.12, 0.4, 0.5]} />{mat}</mesh>
+        </>
+      )}
+      {style === "spiky" && (
+        <>
+          <mesh position={[-0.16, 1.96, 0]}><boxGeometry args={[0.12, 0.18, 0.12]} />{mat}</mesh>
+          <mesh position={[0.04, 2.0, 0]}><boxGeometry args={[0.12, 0.22, 0.12]} />{mat}</mesh>
+          <mesh position={[0.2, 1.95, 0]}><boxGeometry args={[0.12, 0.16, 0.12]} />{mat}</mesh>
+        </>
+      )}
+    </group>
+  );
+}
 
 // 4×3 desk grid → 3D positions (x, z). Centred on origin.
 function deskPos(i: number): [number, number] {
@@ -27,13 +80,15 @@ function deskPos(i: number): [number, number] {
 }
 
 function VoxelAgent({
-  x, z, body, hair, selected, onSelect, name,
+  x, z, stageId, selected, onSelect,
 }: {
-  x: number; z: number; body: string; hair: string;
-  selected: boolean; onSelect: () => void; name: string;
+  x: number; z: number; stageId: string;
+  selected: boolean; onSelect: () => void;
 }) {
   const [hover, setHover] = useState(false);
+  const p = PROFILE[stageId] ?? { outfit: "#888", hair: "#333", style: "bob" as HairStyle };
   const lift = selected ? 0.15 : 0;
+  const hot = selected || hover;
   return (
     <group
       position={[x, lift, z]}
@@ -43,40 +98,30 @@ function VoxelAgent({
       scale={selected ? 1.12 : 1}
     >
       {/* legs */}
-      <mesh position={[0, 0.25, 0]} castShadow>
-        <boxGeometry args={[0.5, 0.5, 0.35]} />
-        <meshStandardMaterial color="#2a2a2a" flatShading />
+      <mesh position={[-0.16, 0.28, 0]} castShadow><boxGeometry args={[0.22, 0.55, 0.32]} /><meshStandardMaterial color="#2a2f3a" flatShading /></mesh>
+      <mesh position={[0.16, 0.28, 0]} castShadow><boxGeometry args={[0.22, 0.55, 0.32]} /><meshStandardMaterial color="#2a2f3a" flatShading /></mesh>
+      {/* torso (outfit) — emissive lifts on hover/select */}
+      <mesh position={[0, 0.92, 0]} castShadow>
+        <boxGeometry args={[0.72, 0.78, 0.44]} />
+        <meshStandardMaterial color={p.outfit} flatShading emissive={p.outfit} emissiveIntensity={hot ? 0.5 : 0.14} />
       </mesh>
-      {/* torso (agent colour) */}
-      <mesh position={[0, 0.85, 0]} castShadow>
-        <boxGeometry args={[0.7, 0.75, 0.42]} />
-        <meshStandardMaterial color={body} flatShading
-          emissive={body} emissiveIntensity={selected || hover ? 0.5 : 0.12} />
-      </mesh>
+      {/* shoulders/arms */}
+      <mesh position={[-0.46, 0.98, 0]} castShadow><boxGeometry args={[0.2, 0.62, 0.34]} /><meshStandardMaterial color={p.outfit} flatShading /></mesh>
+      <mesh position={[0.46, 0.98, 0]} castShadow><boxGeometry args={[0.2, 0.62, 0.34]} /><meshStandardMaterial color={p.outfit} flatShading /></mesh>
       {/* head */}
-      <mesh position={[0, 1.45, 0]} castShadow>
-        <boxGeometry args={[0.48, 0.48, 0.45]} />
-        <meshStandardMaterial color={SKIN} flatShading />
-      </mesh>
-      {/* hair */}
-      <mesh position={[0, 1.74, -0.02]} castShadow>
-        <boxGeometry args={[0.54, 0.22, 0.52]} />
-        <meshStandardMaterial color={hair} flatShading />
-      </mesh>
+      <mesh position={[0, 1.5, 0]} castShadow><boxGeometry args={[0.5, 0.5, 0.46]} /><meshStandardMaterial color={SKIN} flatShading /></mesh>
+      {/* hair (style-specific silhouette) */}
+      <Hair color={p.hair} style={p.style} />
+
       {/* desk in front */}
-      <mesh position={[0, 0.55, 0.75]} castShadow receiveShadow>
-        <boxGeometry args={[1.25, 0.12, 0.7]} />
-        <meshStandardMaterial color="#3a4a63" flatShading />
-      </mesh>
-      <mesh position={[0, 0.25, 1.05]}>
-        <boxGeometry args={[1.2, 0.5, 0.08]} />
-        <meshStandardMaterial color="#2e3b50" flatShading />
-      </mesh>
-      {/* selection ring on the floor */}
+      <mesh position={[0, 0.6, 0.78]} castShadow receiveShadow><boxGeometry args={[1.3, 0.12, 0.72]} /><meshStandardMaterial color="#3a4a63" flatShading /></mesh>
+      <mesh position={[0, 0.3, 1.08]}><boxGeometry args={[1.2, 0.55, 0.08]} /><meshStandardMaterial color="#2e3b50" flatShading /></mesh>
+
+      {/* selection ring */}
       {selected && (
-        <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.8, 0.95, 24]} />
-          <meshBasicMaterial color={body} />
+        <mesh position={[0, 0.03, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.85, 1.0, 28]} />
+          <meshBasicMaterial color={p.outfit} />
         </mesh>
       )}
     </group>
@@ -113,9 +158,7 @@ export default function HQScene3D({ selectedId, onSelect }: { selectedId: string
             key={s.id}
             x={x}
             z={z}
-            name={s.agent.name}
-            body={s.agent.color}
-            hair={HAIR[s.id] ?? "#333"}
+            stageId={s.id}
             selected={selectedId === s.id}
             onSelect={() => onSelect(s.id)}
           />
