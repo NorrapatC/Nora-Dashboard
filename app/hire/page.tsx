@@ -2,6 +2,12 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 const TemplateGallery = dynamic(() => import("@/components/TemplateGallery"), { ssr: false });
+const HeroRoom3D = dynamic(() => import("@/components/HeroRoom3D"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center text-sm text-slate-300">โหลดห้อง 3D…</div>
+  ),
+});
 
 const ORANGE = "#c96442";
 
@@ -362,21 +368,26 @@ export default function HirePage() {
             </div>
           </div>
 
-          {/* Stats card */}
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { label: "Projects delivered", value: "10+", color: ORANGE, bg: "#fdf3ef", border: "#f5d6c8" },
-              { label: "Avg. delivery time", value: "7 วัน", color: "#6366f1", bg: "#eef2ff", border: "#c7d2fe" },
-              { label: "Tech stack", value: "8+", color: "#10b981", bg: "#f0fdf4", border: "#bbf7d0" },
-              { label: "Response time", value: "< 24h", color: "#0ea5e9", bg: "#f0f9ff", border: "#bae6fd" },
-            ].map((s) => (
-              <div key={s.label} className="rounded-2xl p-5"
-                style={{ background: s.bg, border: `1px solid ${s.border}` }}>
-                <p className="text-3xl font-black mb-2" style={{ color: s.color }}>{s.value}</p>
-                <p className="text-xs font-medium text-slate-500">{s.label}</p>
-              </div>
-            ))}
+          {/* 3D isometric workspace (auto-rotating, low-poly) */}
+          <div className="relative h-[340px] sm:h-[420px] w-full">
+            <HeroRoom3D />
           </div>
+        </div>
+
+        {/* Stats strip */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-14">
+          {[
+            { label: "Projects delivered", value: "10+", color: ORANGE, bg: "#fdf3ef", border: "#f5d6c8" },
+            { label: "Avg. delivery time", value: "7 วัน", color: "#6366f1", bg: "#eef2ff", border: "#c7d2fe" },
+            { label: "Tech stack", value: "8+", color: "#10b981", bg: "#f0fdf4", border: "#bbf7d0" },
+            { label: "Response time", value: "< 24h", color: "#0ea5e9", bg: "#f0f9ff", border: "#bae6fd" },
+          ].map((s) => (
+            <div key={s.label} className="rounded-2xl p-5"
+              style={{ background: s.bg, border: `1px solid ${s.border}` }}>
+              <p className="text-3xl font-black mb-2" style={{ color: s.color }}>{s.value}</p>
+              <p className="text-xs font-medium text-slate-500">{s.label}</p>
+            </div>
+          ))}
         </div>
       </section>
 
