@@ -67,20 +67,21 @@ function Desk({ gx, gy }: { gx: number; gy: number }) {
 }
 
 // ── A seated character: real portrait avatar (clipped circle) + body + name pill ──
-function Person({ gx, gy, id, color, name, dot, selected, onClick }: {
-  gx: number; gy: number; id: string; color: string; name: string; dot: string; selected: boolean; onClick?: () => void;
+function Person({ gx, gy, id, color, name, dot, status, selected, onClick }: {
+  gx: number; gy: number; id: string; color: string; name: string; dot: string; status: StageStatus; selected: boolean; onClick?: () => void;
 }) {
   const p = iso(gx, gy + 0.34, 0); // a touch in front of the desk
   const R = 16;
+  // status drives the character's "activity" look
+  const ringColor = status === "in_progress" ? "#16a34a" : status === "blocked" ? "#ef4444" : selected ? color : "#fbfbf3";
   return (
-    <g transform={`translate(${p.sx},${p.sy})`} onClick={onClick} style={{ cursor: onClick ? "pointer" : "default" }}>
+    <g transform={`translate(${p.sx},${p.sy})`} onClick={onClick}
+      style={{ cursor: onClick ? "pointer" : "default", opacity: status === "idle" && !selected ? 0.62 : 1 }}>
       {/* shadow */}
       <ellipse cx={0} cy={2} rx={16} ry={8} fill={PAL.shadow} />
       {/* body (shoulders) */}
       <path d={`M -12 -2 Q -13 -24 0 -25 Q 13 -24 12 -2 Z`} fill={color} stroke={selected ? "#3a3f33" : "none"} strokeWidth={selected ? 2 : 0} />
-      {/* avatar: prefer a pixel-art version (drop files in public/team/pixel/{id}.png),
-          fall back to the smooth portrait until those exist. imageRendering:pixelated
-          keeps the pixel art crisp. */}
+      {/* avatar (pixel-first, portrait fallback) + activity ring */}
       <g transform="translate(0,-40)">
         <circle r={R} fill={PAL.skin} />
         <image href={`/team/pixel/${id}.png`} x={-R} y={-R} width={R * 2} height={R * 2}
@@ -90,7 +91,30 @@ function Person({ gx, gy, id, color, name, dot, selected, onClick }: {
             const t = e.currentTarget;
             if (!t.dataset.fallback) { t.dataset.fallback = "1"; t.setAttribute("href", `/team/${id}.png`); }
           }} />
-        <circle r={R} fill="none" stroke={selected ? color : "#fbfbf3"} strokeWidth={selected ? 3 : 2} />
+        {/* working: pulsing activity ring */}
+        {status === "in_progress" && (
+          <circle r={R + 1.5} fill="none" stroke="#16a34a" strokeWidth={2} className="iso-work" />
+        )}
+        <circle r={R} fill="none" stroke={ringColor} strokeWidth={selected ? 3 : 2} />
+        {/* status badge (top-right of avatar) */}
+        {status === "completed" && (
+          <g transform="translate(11,-12)">
+            <circle r={5.5} fill="#0ea5e9" stroke="#fff" strokeWidth={1} />
+            <path d="M -2.4 0 L -0.6 2 L 2.6 -2" stroke="#fff" strokeWidth={1.4} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+        )}
+        {status === "in_progress" && (
+          <g transform="translate(11,-12)">
+            <circle r={5.5} fill="#16a34a" stroke="#fff" strokeWidth={1} />
+            <path d="M 0 -3 L 0 0 L 2 1.5" stroke="#fff" strokeWidth={1.2} fill="none" strokeLinecap="round" />
+          </g>
+        )}
+        {status === "blocked" && (
+          <g transform="translate(11,-12)">
+            <circle r={5.5} fill="#ef4444" stroke="#fff" strokeWidth={1} />
+            <text y={2.4} textAnchor="middle" fontSize={8} fontWeight={700} fill="#fff">!</text>
+          </g>
+        )}
       </g>
       {/* name pill */}
       <g transform="translate(0,-66)">
@@ -126,7 +150,7 @@ export default function IsoOffice({
       list.push({
         depth: d + 0.5,
         el: <Person key={`p-${a.id}`} gx={gx} gy={gy} id={a.id} color={a.color} name={a.name}
-          dot={STATUS_DOT[st] ?? STATUS_DOT.idle} selected={selectedId === a.id}
+          dot={STATUS_DOT[st] ?? STATUS_DOT.idle} status={st} selected={selectedId === a.id}
           onClick={onSelect ? () => onSelect(a.id) : undefined} />,
       });
     }
@@ -150,6 +174,7 @@ export default function IsoOffice({
         <defs>
           {/* circular crop for portrait avatars */}
           <clipPath id="isoAvatarClip" clipPathUnits="objectBoundingBox"><circle cx="0.5" cy="0.5" r="0.5" /></clipPath>
+          <style>{`@keyframes isowork{0%,100%{opacity:.25}50%{opacity:.9}}.iso-work{animation:isowork 1.4s ease-in-out infinite}`}</style>
         </defs>
         {/* floor slab under the whole grid */}
         <FloorSlab agents={agents} cols={cols} />
