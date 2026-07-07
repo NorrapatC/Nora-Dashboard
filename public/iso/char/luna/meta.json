@@ -1,0 +1,356 @@
+{
+ "idle": [
+  {
+   "file": "idle_0.png",
+   "w": 79,
+   "h": 104
+  },
+  {
+   "file": "idle_1.png",
+   "w": 95,
+   "h": 90
+  },
+  {
+   "file": "idle_2.png",
+   "w": 94,
+   "h": 94
+  },
+  {
+   "file": "idle_3.png",
+   "w": 57,
+   "h": 90
+  },
+  {
+   "file": "idle_4.png",
+   "w": 60,
+   "h": 90
+  },
+  {
+   "file": "idle_5.png",
+   "w": 57,
+   "h": 91
+  }
+ ],
+ "coffee": [
+  {
+   "file": "coffee_0.png",
+   "w": 220,
+   "h": 104
+  },
+  {
+   "file": "coffee_1.png",
+   "w": 106,
+   "h": 92
+  },
+  {
+   "file": "coffee_2.png",
+   "w": 105,
+   "h": 104
+  },
+  {
+   "file": "coffee_3.png",
+   "w": 106,
+   "h": 92
+  },
+  {
+   "file": "coffee_4.png",
+   "w": 102,
+   "h": 95
+  }
+ ],
+ "reading": [
+  {
+   "file": "reading_0.png",
+   "w": 142,
+   "h": 107
+  },
+  {
+   "file": "reading_1.png",
+   "w": 54,
+   "h": 91
+  },
+  {
+   "file": "reading_2.png",
+   "w": 53,
+   "h": 91
+  },
+  {
+   "file": "reading_3.png",
+   "w": 53,
+   "h": 91
+  },
+  {
+   "file": "reading_4.png",
+   "w": 54,
+   "h": 91
+  },
+  {
+   "file": "reading_5.png",
+   "w": 54,
+   "h": 91
+  }
+ ],
+ "writing": [
+  {
+   "file": "writing_0.png",
+   "w": 226,
+   "h": 100
+  },
+  {
+   "file": "writing_1.png",
+   "w": 73,
+   "h": 92
+  },
+  {
+   "file": "writing_2.png",
+   "w": 73,
+   "h": 75
+  },
+  {
+   "file": "writing_3.png",
+   "w": 73,
+   "h": 75
+  }
+ ],
+ "walk_down": [
+  {
+   "file": "walk_down_0.png",
+   "w": 56,
+   "h": 104
+  },
+  {
+   "file": "walk_down_1.png",
+   "w": 42,
+   "h": 93
+  },
+  {
+   "file": "walk_down_2.png",
+   "w": 43,
+   "h": 93
+  },
+  {
+   "file": "walk_down_3.png",
+   "w": 42,
+   "h": 92
+  },
+  {
+   "file": "walk_down_4.png",
+   "w": 43,
+   "h": 105
+  },
+  {
+   "file": "walk_down_5.png",
+   "w": 43,
+   "h": 89
+  },
+  {
+   "file": "walk_down_6.png",
+   "w": 42,
+   "h": 93
+  }
+ ],
+ "walk_up": [
+  {
+   "file": "walk_up_0.png",
+   "w": 219,
+   "h": 107
+  },
+  {
+   "file": "walk_up_1.png",
+   "w": 98,
+   "h": 107
+  },
+  {
+   "file": "walk_up_2.png",
+   "w": 103,
+   "h": 107
+  },
+  {
+   "file": "walk_up_3.png",
+   "w": 110,
+   "h": 107
+  }
+ ],
+ "walk_left": [
+  {
+   "file": "walk_left_0.png",
+   "w": 101,
+   "h": 105
+  },
+  {
+   "file": "walk_left_1.png",
+   "w": 55,
+   "h": 105
+  },
+  {
+   "file": "walk_left_2.png",
+   "w": 54,
+   "h": 106
+  },
+  {
+   "file": "walk_left_3.png",
+   "w": 54,
+   "h": 106
+  },
+  {
+   "file": "walk_left_4.png",
+   "w": 55,
+   "h": 106
+  },
+  {
+   "file": "walk_left_5.png",
+   "w": 55,
+   "h": 106
+  },
+  {
+   "file": "walk_left_6.png",
+   "w": 54,
+   "h": 106
+  },
+  {
+   "file": "walk_left_7.png",
+   "w": 54,
+   "h": 106
+  }
+ ],
+ "walk_right": [
+  {
+   "file": "walk_right_0.png",
+   "w": 217,
+   "h": 106
+  },
+  {
+   "file": "walk_right_1.png",
+   "w": 101,
+   "h": 106
+  },
+  {
+   "file": "walk_right_2.png",
+   "w": 102,
+   "h": 106
+  },
+  {
+   "file": "walk_right_3.png",
+   "w": 101,
+   "h": 106
+  },
+  {
+   "file": "walk_right_4.png",
+   "w": 98,
+   "h": 29
+  }
+ ],
+ "sit_typing": [
+  {
+   "file": "sit_typing_0.png",
+   "w": 157,
+   "h": 118
+  },
+  {
+   "file": "sit_typing_1.png",
+   "w": 54,
+   "h": 86
+  },
+  {
+   "file": "sit_typing_2.png",
+   "w": 55,
+   "h": 86
+  },
+  {
+   "file": "sit_typing_3.png",
+   "w": 54,
+   "h": 86
+  },
+  {
+   "file": "sit_typing_4.png",
+   "w": 54,
+   "h": 86
+  },
+  {
+   "file": "sit_typing_5.png",
+   "w": 54,
+   "h": 86
+  },
+  {
+   "file": "sit_typing_6.png",
+   "w": 54,
+   "h": 116
+  }
+ ],
+ "presenting": [
+  {
+   "file": "presenting_0.png",
+   "w": 326,
+   "h": 115
+  },
+  {
+   "file": "presenting_1.png",
+   "w": 109,
+   "h": 92
+  },
+  {
+   "file": "presenting_2.png",
+   "w": 109,
+   "h": 91
+  },
+  {
+   "file": "presenting_3.png",
+   "w": 105,
+   "h": 91
+  }
+ ],
+ "debugging": [
+  {
+   "file": "debugging_0.png",
+   "w": 97,
+   "h": 102
+  },
+  {
+   "file": "debugging_1.png",
+   "w": 107,
+   "h": 92
+  },
+  {
+   "file": "debugging_2.png",
+   "w": 107,
+   "h": 92
+  },
+  {
+   "file": "debugging_3.png",
+   "w": 113,
+   "h": 93
+  },
+  {
+   "file": "debugging_4.png",
+   "w": 106,
+   "h": 92
+  },
+  {
+   "file": "debugging_5.png",
+   "w": 95,
+   "h": 93
+  }
+ ],
+ "security": [
+  {
+   "file": "security_0.png",
+   "w": 80,
+   "h": 93
+  },
+  {
+   "file": "security_1.png",
+   "w": 65,
+   "h": 97
+  },
+  {
+   "file": "security_2.png",
+   "w": 66,
+   "h": 93
+  },
+  {
+   "file": "security_3.png",
+   "w": 31,
+   "h": 66
+  }
+ ]
+}

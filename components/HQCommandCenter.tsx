@@ -16,17 +16,11 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { PIPELINE_STAGES, type StageStatus } from "@/lib/pipeline";
 import { usePipeline } from "@/contexts/PipelineContext";
-import HQWorkflowGraph from "@/components/HQWorkflowGraph";
-import HQRoster from "@/components/HQRoster";
 import HQHud from "@/components/HQHud";
-import IsoOffice from "@/components/IsoOffice";
 
-// Team agents for the 2D isometric office.
-const ISO_AGENTS = PIPELINE_STAGES.map((s) => ({ id: s.id, name: s.agent.name, color: s.agent.color }));
-
-// NOTE: the old Phaser office (HQGame) and 3D scene (HQScene3D) are no longer wired
-// into the view switcher — the OFFICE view is now the 2D isometric office (IsoOffice).
-// Those component files are kept on disk in case we revisit pixel/3D.
+// /hq is the single dark "Command Center" page (แบบหน้า.JPG = Claude Code HUD):
+// TEAM STATUS sidebar + workflow-graph & role panels (HQHud) + AGENT DETAIL / ACTIVITY
+// + bottom stats. The 4-view toggle was removed.
 
 // ─── Palette ────────────────────────────────────────────────────────────────
 const C = {
@@ -171,7 +165,6 @@ export default function HQCommandCenter() {
   const clock = useClock();
   const { getEffectiveStatus, progress } = usePipeline();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [view, setView] = useState<"hud" | "office" | "graph" | "roster">("hud");
 
   return (
     <div className="flex h-full flex-col" style={{ background: C.bg, backgroundImage: GRID, fontFamily: MONO }}>
@@ -243,45 +236,13 @@ export default function HQCommandCenter() {
           </div>
         </aside>
 
-        {/* Center — COMMAND CENTER: toggle between the office and workflow graph */}
+        {/* Center — COMMAND CENTER (แบบหน้า.JPG layout: workflow graph + role panels) */}
         <main className="relative flex min-w-0 flex-1 flex-col">
-          <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: `1px solid ${C.border}` }}>
-            <span style={{ color: C.cyan, fontFamily: MONO, fontSize: 10, letterSpacing: 2 }}>
-              ◆ COMMAND CENTER
-            </span>
-            <div className="flex items-center gap-1 rounded-md overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
-              {([
-                ["hud", "◎ HUD"],
-                ["office", "⊞ OFFICE"],
-                ["graph", "⌗ GRAPH"],
-                ["roster", "★ ROSTER"],
-              ] as const).map(([v, label]) => (
-                <button
-                  key={v}
-                  onClick={() => setView(v)}
-                  className="px-2.5 py-1 transition-colors"
-                  style={{
-                    fontSize: 9, letterSpacing: 1, fontFamily: MONO,
-                    background: view === v ? C.cyan : "transparent",
-                    color: view === v ? "#06121a" : C.muted,
-                    fontWeight: view === v ? 700 : 400,
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+          <div className="flex items-center px-3 py-2" style={{ borderBottom: `1px solid ${C.border}` }}>
+            <span style={{ color: C.cyan, fontFamily: MONO, fontSize: 10, letterSpacing: 2 }}>◆ COMMAND CENTER</span>
           </div>
           <div className="relative flex-1" style={{ minHeight: 0, background: "#0a0e17" }}>
-            {view === "hud" ? (
-              <HQHud selectedId={selectedId} onSelect={setSelectedId} />
-            ) : view === "office" ? (
-              <IsoOffice agents={ISO_AGENTS} selectedId={selectedId} onSelect={setSelectedId} />
-            ) : view === "graph" ? (
-              <HQWorkflowGraph selectedId={selectedId} onSelect={setSelectedId} />
-            ) : (
-              <HQRoster selectedId={selectedId} onSelect={setSelectedId} />
-            )}
+            <HQHud selectedId={selectedId} onSelect={setSelectedId} />
           </div>
         </main>
 

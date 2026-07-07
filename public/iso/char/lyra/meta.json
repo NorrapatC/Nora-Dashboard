@@ -1,0 +1,50 @@
+{
+ "idle": [
+  {
+   "file": "idle_0.png",
+   "w": 1376,
+   "h": 104
+  }
+ ],
+ "coffee": [],
+ "reading": [
+  {
+   "file": "reading_0.png",
+   "w": 1376,
+   "h": 107
+  }
+ ],
+ "writing": [],
+ "walk_down": [
+  {
+   "file": "walk_down_0.png",
+   "w": 1376,
+   "h": 107
+  }
+ ],
+ "walk_up": [],
+ "walk_left": [
+  {
+   "file": "walk_left_0.png",
+   "w": 1376,
+   "h": 106
+  }
+ ],
+ "walk_right": [],
+ "sit_typing": [
+  {
+   "file": "sit_typing_0.png",
+   "w": 1376,
+   "h": 118
+  }
+ ],
+ "presenting": [],
+ "debugging": [
+  {
+   "file": "debugging_0.png",
+   "w": 1376,
+   "h": 106
+  }
+ ],
+ "security": []
+}

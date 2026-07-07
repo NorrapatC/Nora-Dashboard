@@ -1,0 +1,356 @@
+{
+ "idle": [
+  {
+   "file": "idle_0.png",
+   "w": 47,
+   "h": 104
+  },
+  {
+   "file": "idle_1.png",
+   "w": 46,
+   "h": 104
+  },
+  {
+   "file": "idle_2.png",
+   "w": 47,
+   "h": 104
+  },
+  {
+   "file": "idle_3.png",
+   "w": 46,
+   "h": 104
+  },
+  {
+   "file": "idle_4.png",
+   "w": 47,
+   "h": 104
+  },
+  {
+   "file": "idle_5.png",
+   "w": 47,
+   "h": 104
+  },
+  {
+   "file": "idle_6.png",
+   "w": 68,
+   "h": 104
+  },
+  {
+   "file": "idle_7.png",
+   "w": 47,
+   "h": 104
+  }
+ ],
+ "coffee": [
+  {
+   "file": "coffee_0.png",
+   "w": 68,
+   "h": 104
+  },
+  {
+   "file": "coffee_1.png",
+   "w": 68,
+   "h": 104
+  },
+  {
+   "file": "coffee_2.png",
+   "w": 69,
+   "h": 104
+  },
+  {
+   "file": "coffee_3.png",
+   "w": 68,
+   "h": 104
+  },
+  {
+   "file": "coffee_4.png",
+   "w": 61,
+   "h": 104
+  },
+  {
+   "file": "coffee_5.png",
+   "w": 60,
+   "h": 104
+  }
+ ],
+ "reading": [
+  {
+   "file": "reading_0.png",
+   "w": 44,
+   "h": 107
+  },
+  {
+   "file": "reading_1.png",
+   "w": 43,
+   "h": 107
+  },
+  {
+   "file": "reading_2.png",
+   "w": 43,
+   "h": 107
+  },
+  {
+   "file": "reading_3.png",
+   "w": 43,
+   "h": 107
+  },
+  {
+   "file": "reading_4.png",
+   "w": 44,
+   "h": 107
+  },
+  {
+   "file": "reading_5.png",
+   "w": 43,
+   "h": 107
+  },
+  {
+   "file": "reading_6.png",
+   "w": 43,
+   "h": 107
+  },
+  {
+   "file": "reading_7.png",
+   "w": 43,
+   "h": 107
+  }
+ ],
+ "writing": [
+  {
+   "file": "writing_0.png",
+   "w": 68,
+   "h": 107
+  },
+  {
+   "file": "writing_1.png",
+   "w": 68,
+   "h": 107
+  },
+  {
+   "file": "writing_2.png",
+   "w": 69,
+   "h": 107
+  },
+  {
+   "file": "writing_3.png",
+   "w": 68,
+   "h": 107
+  },
+  {
+   "file": "writing_4.png",
+   "w": 68,
+   "h": 107
+  },
+  {
+   "file": "writing_5.png",
+   "w": 60,
+   "h": 107
+  }
+ ],
+ "walk_down": [
+  {
+   "file": "walk_down_0.png",
+   "w": 44,
+   "h": 105
+  },
+  {
+   "file": "walk_down_1.png",
+   "w": 43,
+   "h": 105
+  },
+  {
+   "file": "walk_down_2.png",
+   "w": 45,
+   "h": 105
+  },
+  {
+   "file": "walk_down_3.png",
+   "w": 44,
+   "h": 106
+  },
+  {
+   "file": "walk_down_4.png",
+   "w": 44,
+   "h": 105
+  },
+  {
+   "file": "walk_down_5.png",
+   "w": 44,
+   "h": 105
+  },
+  {
+   "file": "walk_down_6.png",
+   "w": 45,
+   "h": 106
+  },
+  {
+   "file": "walk_down_7.png",
+   "w": 43,
+   "h": 105
+  }
+ ],
+ "walk_up": [
+  {
+   "file": "walk_up_0.png",
+   "w": 53,
+   "h": 106
+  },
+  {
+   "file": "walk_up_1.png",
+   "w": 53,
+   "h": 106
+  },
+  {
+   "file": "walk_up_2.png",
+   "w": 56,
+   "h": 106
+  },
+  {
+   "file": "walk_up_3.png",
+   "w": 56,
+   "h": 106
+  },
+  {
+   "file": "walk_up_4.png",
+   "w": 58,
+   "h": 106
+  },
+  {
+   "file": "walk_up_5.png",
+   "w": 123,
+   "h": 106
+  }
+ ],
+ "walk_left": [
+  {
+   "file": "walk_left_0.png",
+   "w": 50,
+   "h": 106
+  },
+  {
+   "file": "walk_left_1.png",
+   "w": 50,
+   "h": 106
+  },
+  {
+   "file": "walk_left_2.png",
+   "w": 51,
+   "h": 106
+  },
+  {
+   "file": "walk_left_3.png",
+   "w": 51,
+   "h": 106
+  },
+  {
+   "file": "walk_left_4.png",
+   "w": 52,
+   "h": 106
+  },
+  {
+   "file": "walk_left_5.png",
+   "w": 50,
+   "h": 106
+  },
+  {
+   "file": "walk_left_6.png",
+   "w": 51,
+   "h": 106
+  },
+  {
+   "file": "walk_left_7.png",
+   "w": 52,
+   "h": 106
+  }
+ ],
+ "walk_right": [
+  {
+   "file": "walk_right_0.png",
+   "w": 163,
+   "h": 106
+  },
+  {
+   "file": "walk_right_1.png",
+   "w": 435,
+   "h": 106
+  }
+ ],
+ "sit_typing": [
+  {
+   "file": "sit_typing_0.png",
+   "w": 70,
+   "h": 65
+  },
+  {
+   "file": "sit_typing_1.png",
+   "w": 70,
+   "h": 65
+  },
+  {
+   "file": "sit_typing_2.png",
+   "w": 420,
+   "h": 118
+  },
+  {
+   "file": "sit_typing_3.png",
+   "w": 70,
+   "h": 65
+  }
+ ],
+ "presenting": [
+  {
+   "file": "presenting_0.png",
+   "w": 171,
+   "h": 92
+  },
+  {
+   "file": "presenting_1.png",
+   "w": 80,
+   "h": 71
+  },
+  {
+   "file": "presenting_2.png",
+   "w": 171,
+   "h": 71
+  },
+  {
+   "file": "presenting_3.png",
+   "w": 171,
+   "h": 71
+  }
+ ],
+ "debugging": [
+  {
+   "file": "debugging_0.png",
+   "w": 172,
+   "h": 89
+  },
+  {
+   "file": "debugging_1.png",
+   "w": 434,
+   "h": 100
+  }
+ ],
+ "security": [
+  {
+   "file": "security_0.png",
+   "w": 48,
+   "h": 80
+  },
+  {
+   "file": "security_1.png",
+   "w": 44,
+   "h": 81
+  },
+  {
+   "file": "security_2.png",
+   "w": 46,
+   "h": 81
+  },
+  {
+   "file": "security_3.png",
+   "w": 44,
+   "h": 80
+  }
+ ]
+}
